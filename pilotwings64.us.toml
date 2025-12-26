@@ -1,0 +1,23 @@
+# Config file for Pilotwings 64 US Recompilation.
+[input]
+entrypoint = 0x80200050
+# Paths are relative to the location of this config file.
+# elf_path = "pilotwings64.us.elf"
+symbols_file_path = "Pilotwings64RecompSyms/pilotwings64.us.syms.toml"
+# rom_file_path = "baserom.us.z64"
+output_func_path = "RecompiledFuncs"
+use_absolute_symbols = false
+
+[patches]
+stubs = [
+]
+
+ignored = [
+]
+
+# fixes a bug with the recompiler handling an Indirect tail call.
+# [[patches.instruction]]
+# func = "func_80040C54"
+# vram = 0x80040C8C
+# value = 0x03E00008 # jr $s3 -> jr $ra
+
