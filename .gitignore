@@ -36,6 +36,15 @@
 *.exe
 *.out
 *.app
+*.elf
+*.rom
+*.n64
+*.z64
+*.eeprom
 
 # debug information files
 *.dwo
+
+# miscellaneous
+*.swp
+
