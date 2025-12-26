@@ -1,0 +1,3 @@
+[submodule "Pilotwings64RecompSyms"]
+	path = Pilotwings64RecompSyms
+	url = https://github.com/gcsmith/Pilotwings64RecompSyms.git
