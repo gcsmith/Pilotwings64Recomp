@@ -45,7 +45,7 @@
 #include "../../patches/sound.h"
 #include "../../patches/misc_funcs.h"
 
-#include "mods/mm_recomp_dpad_builtin.h"
+// #include "mods/mm_recomp_dpad_builtin.h"
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
@@ -56,7 +56,7 @@
 
 #include "../../lib/rt64/src/contrib/stb/stb_image.h"
 
-const std::string version_string = "1.2.2";
+const std::string version_string = "0.0.1";
 
 template<typename... Ts>
 void exit_error(const char* str, Ts ...args) {
@@ -327,7 +327,7 @@ void reset_audio(uint32_t output_freq) {
     update_audio_converter();
 }
 
-extern RspUcodeFunc njpgdspMain;
+// extern RspUcodeFunc njpgdspMain;
 extern RspUcodeFunc aspMain;
 
 RspUcodeFunc* get_rsp_microcode(const OSTask* task) {
@@ -335,8 +335,8 @@ RspUcodeFunc* get_rsp_microcode(const OSTask* task) {
     case M_AUDTASK:
         return aspMain;
 
-    case M_NJPEGTASK:
-        return njpgdspMain;
+    // case M_NJPEGTASK:
+    //     return njpgdspMain;
 
     default:
         fprintf(stderr, "Unknown task: %" PRIu32 "\n", task->t.type);
@@ -350,14 +350,12 @@ gpr get_entrypoint_address();
 // array of supported GameEntry objects
 std::vector<recomp::GameEntry> supported_games = {
     {
-        .rom_hash = 0xEF18B4A9E2386169ULL,
+        .rom_hash = 0x887ab02583c90111ULL,
         .internal_name = "Pilot Wings64",
         .game_id = u8"pilotwings64.n64.us.1.0",
-        .mod_game_id = "mm",
+        .mod_game_id = "pilotwings64",
         .save_type = recomp::SaveType::Flashram,
         .is_enabled = false,
-        .decompression_routine = pilotwings64::decompress_mm,
-        .has_compressed_code = true,
         .entrypoint_address = get_entrypoint_address(),
         .entrypoint = recomp_entrypoint,
     },
@@ -655,7 +653,7 @@ int main(int argc, char** argv) {
         recomp::register_game(game);
     }
 
-    recomp::mods::register_embedded_mod("mm_recomp_dpad_builtin", { (const uint8_t*)(mm_recomp_dpad_builtin), std::size(mm_recomp_dpad_builtin)});
+    //recomp::mods::register_embedded_mod("mm_recomp_dpad_builtin", { (const uint8_t*)(mm_recomp_dpad_builtin), std::size(mm_recomp_dpad_builtin)});
 
     REGISTER_FUNC(recomp_get_window_resolution);
     REGISTER_FUNC(recomp_get_target_aspect_ratio);
@@ -675,7 +673,7 @@ int main(int argc, char** argv) {
 
     pilotwings64::register_overlays();
     pilotwings64::register_patches();
-    recomputil::init_extended_actor_data();
+    // recomputil::init_extended_actor_data();
     pilotwings64::load_config();
 
     recomp::rsp::callbacks_t rsp_callbacks{

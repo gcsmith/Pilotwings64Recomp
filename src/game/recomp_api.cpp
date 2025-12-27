@@ -14,6 +14,30 @@
 #include "ultramodern/ultramodern.hpp"
 #include "ultramodern/config.hpp"
 
+extern "C" void __osContGetInitData_recomp(uint8_t* rdram, recomp_context* ctx) { }
+extern "C" void __osEnqueueThread_recomp(uint8_t* rdram, recomp_context* ctx) { }
+extern "C" void __osGetCause_recomp(uint8_t* rdram, recomp_context* ctx) { }
+extern "C" void __osGetSR_recomp(uint8_t* rdram, recomp_context* ctx) { }
+extern "C" void __osPackRequestData_recomp(uint8_t* rdram, recomp_context* ctx) { }
+extern "C" void __osPopThread_recomp(uint8_t* rdram, recomp_context* ctx) { }
+extern "C" void __osSetSR_recomp(uint8_t* rdram, recomp_context* ctx) { }
+extern "C" void __osSiRawStartDma_recomp(uint8_t* rdram, recomp_context* ctx) { }
+extern "C" void __osSpRawReadIo_recomp(uint8_t* rdram, recomp_context* ctx) { }
+extern "C" void __osSpRawWriteIo_recomp(uint8_t* rdram, recomp_context* ctx) { }
+extern "C" void __osTimerInterrupt_recomp(uint8_t* rdram, recomp_context* ctx) { }
+extern "C" void __osViSwapContext_recomp(uint8_t* rdram, recomp_context* ctx) { }
+extern "C" void __rmonStopUserThreads_recomp(uint8_t* rdram, recomp_context* ctx) { }
+extern "C" void bzero_recomp(uint8_t* rdram, recomp_context* ctx) { }
+extern "C" void osMapTLBRdb_recomp(uint8_t* rdram, recomp_context* ctx) { }
+extern "C" void osPiRawReadIo_recomp(uint8_t* rdram, recomp_context* ctx) { }
+extern "C" void osPiWriteIo_recomp(uint8_t* rdram, recomp_context* ctx) { }
+extern "C" void recomp_clear_all_actor_data(uint8_t* rdram, recomp_context* ctx) { }
+extern "C" void recomp_create_actor_data(uint8_t* rdram, recomp_context* ctx) { }
+extern "C" void recomp_destroy_actor_data(uint8_t* rdram, recomp_context* ctx) { }
+extern "C" void recomp_get_actor_data(uint8_t* rdram, recomp_context* ctx) { }
+extern "C" void recomp_get_actor_spawn_index(uint8_t* rdram, recomp_context* ctx) { }
+extern "C" void recomp_register_actor_extension(uint8_t* rdram, recomp_context* ctx) { }
+extern "C" void recomp_register_actor_extension_generic(uint8_t* rdram, recomp_context* ctx) { }
 extern "C" void recomp_update_inputs(uint8_t* rdram, recomp_context* ctx) {
     recomp::poll_inputs();
 }

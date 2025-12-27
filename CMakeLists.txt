@@ -161,9 +161,9 @@ set (SOURCES
     ${CMAKE_SOURCE_DIR}/src/game/debug.cpp
     ${CMAKE_SOURCE_DIR}/src/game/quicksaving.cpp
     ${CMAKE_SOURCE_DIR}/src/game/recomp_api.cpp
-    ${CMAKE_SOURCE_DIR}/src/game/recomp_actor_api.cpp
+    #${CMAKE_SOURCE_DIR}/src/game/recomp_actor_api.cpp
     ${CMAKE_SOURCE_DIR}/src/game/recomp_data_api.cpp
-    ${CMAKE_SOURCE_DIR}/src/game/rom_decompression.cpp
+    #${CMAKE_SOURCE_DIR}/src/game/rom_decompression.cpp
 
     ${CMAKE_SOURCE_DIR}/src/ui/ui_renderer.cpp
     ${CMAKE_SOURCE_DIR}/src/ui/ui_state.cpp
@@ -198,7 +198,7 @@ set (SOURCES
     ${CMAKE_SOURCE_DIR}/src/ui/elements/ui_toggle.cpp
 
     ${CMAKE_SOURCE_DIR}/rsp/aspMain.cpp
-#   ${CMAKE_SOURCE_DIR}/rsp/njpgdspMain.cpp
+    #${CMAKE_SOURCE_DIR}/rsp/njpgdspMain.cpp
 
     ${CMAKE_SOURCE_DIR}/lib/RmlUi/Backends/RmlUi_Platform_SDL.cpp
 )
