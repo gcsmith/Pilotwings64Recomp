@@ -1,6 +1,6 @@
 #include "recomp_ui.h"
-#include "zelda_config.h"
-#include "zelda_support.h"
+#include "pilotwings64_config.h"
+#include "pilotwings64_support.h"
 #include "librecomp/game.hpp"
 #include "ultramodern/ultramodern.hpp"
 #include "RmlUi/Core.h"
@@ -16,7 +16,7 @@ extern std::vector<recomp::GameEntry> supported_games;
 
 void select_rom() {
     nfdnchar_t* native_path = nullptr;
-    zelda64::open_file_dialog([](bool success, const std::filesystem::path& path) {
+    pilotwings64::open_file_dialog([](bool success, const std::filesystem::path& path) {
         if (success) {
             recomp::RomValidationError rom_error = recomp::select_rom(path, supported_games[0].game_id);
             switch (rom_error) {
@@ -63,7 +63,7 @@ public:
 
     }
     void load_document() override {
-		launcher_context = recompui::create_context(zelda64::get_asset_path("launcher.rml"));
+		launcher_context = recompui::create_context(pilotwings64::get_asset_path("launcher.rml"));
     }
     void register_events(recompui::UiEventListenerInstancer& listener) override {
         recompui::register_event(listener, "select_rom",

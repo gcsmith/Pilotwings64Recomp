@@ -1,8 +1,8 @@
-#include "zelda_config.h"
+#include "pilotwings64_config.h"
 #include "recomp_input.h"
-#include "zelda_sound.h"
-#include "zelda_render.h"
-#include "zelda_support.h"
+#include "pilotwings64_sound.h"
+#include "pilotwings64_render.h"
+#include "pilotwings64_support.h"
 #include "ultramodern/config.hpp"
 #include "librecomp/files.hpp"
 #include <filesystem>
@@ -131,7 +131,7 @@ namespace recomp {
     }
 }
 
-std::filesystem::path zelda64::get_app_folder_path() {
+std::filesystem::path pilotwings64::get_app_folder_path() {
    // directly check for portable.txt (windows and native linux binary)
    if (std::filesystem::exists("portable.txt")) {
        return std::filesystem::current_path();
@@ -139,7 +139,7 @@ std::filesystem::path zelda64::get_app_folder_path() {
 
 #if defined(__APPLE__)
    // Check for portable file in the directory containing the app bundle.
-   const auto app_bundle_path = zelda64::get_bundle_directory().parent_path();
+   const auto app_bundle_path = pilotwings64::get_bundle_directory().parent_path();
    if (std::filesystem::exists(app_bundle_path / "portable.txt")) {
        return app_bundle_path;
    }
@@ -152,7 +152,7 @@ std::filesystem::path zelda64::get_app_folder_path() {
    PWSTR known_path = NULL;
    HRESULT result = SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, NULL, &known_path);
    if (result == S_OK) {
-       recomp_dir = std::filesystem::path{known_path} / zelda64::program_id;
+       recomp_dir = std::filesystem::path{known_path} / pilotwings64::program_id;
    }
 
    CoTaskMemFree(known_path);
@@ -163,9 +163,9 @@ std::filesystem::path zelda64::get_app_folder_path() {
    }
 
 #if defined(__APPLE__)
-   const auto supportdir = zelda64::get_application_support_directory();
+   const auto supportdir = pilotwings64::get_application_support_directory();
    if (supportdir) {
-       return *supportdir / zelda64::program_id;
+       return *supportdir / pilotwings64::program_id;
    }
 #endif
 
@@ -180,7 +180,7 @@ std::filesystem::path zelda64::get_app_folder_path() {
    }
 
    if (homedir != nullptr) {
-       recomp_dir = std::filesystem::path{homedir} / (std::u8string{u8".config/"} + std::u8string{zelda64::program_id});
+       recomp_dir = std::filesystem::path{homedir} / (std::u8string{u8".config/"} + std::u8string{pilotwings64::program_id});
    }
 #endif
 
@@ -231,33 +231,33 @@ bool save_json_with_backups(const std::filesystem::path& path, const nlohmann::j
 bool save_general_config(const std::filesystem::path& path) {
     nlohmann::json config_json{};
 
-    zelda64::to_json(config_json["targeting_mode"], zelda64::get_targeting_mode());
+    pilotwings64::to_json(config_json["targeting_mode"], pilotwings64::get_targeting_mode());
     recomp::to_json(config_json["background_input_mode"], recomp::get_background_input_mode());
     config_json["rumble_strength"] = recomp::get_rumble_strength();
     config_json["gyro_sensitivity"] = recomp::get_gyro_sensitivity();
     config_json["mouse_sensitivity"] = recomp::get_mouse_sensitivity();
     config_json["joystick_deadzone"] = recomp::get_joystick_deadzone();
-    config_json["autosave_mode"] = zelda64::get_autosave_mode();
-    config_json["camera_invert_mode"] = zelda64::get_camera_invert_mode();
-    config_json["analog_cam_mode"] = zelda64::get_analog_cam_mode();
-    config_json["analog_camera_invert_mode"] = zelda64::get_analog_camera_invert_mode();
-    config_json["debug_mode"] = zelda64::get_debug_mode_enabled();
+    config_json["autosave_mode"] = pilotwings64::get_autosave_mode();
+    config_json["camera_invert_mode"] = pilotwings64::get_camera_invert_mode();
+    config_json["analog_cam_mode"] = pilotwings64::get_analog_cam_mode();
+    config_json["analog_camera_invert_mode"] = pilotwings64::get_analog_camera_invert_mode();
+    config_json["debug_mode"] = pilotwings64::get_debug_mode_enabled();
 
     return save_json_with_backups(path, config_json);
 }
 
 void set_general_settings_from_json(const nlohmann::json& config_json) {
-    zelda64::set_targeting_mode(from_or_default(config_json, "targeting_mode", zelda64::TargetingMode::Switch));
+    pilotwings64::set_targeting_mode(from_or_default(config_json, "targeting_mode", pilotwings64::TargetingMode::Switch));
     recomp::set_background_input_mode(from_or_default(config_json, "background_input_mode", recomp::BackgroundInputMode::On));
     recomp::set_rumble_strength(from_or_default(config_json, "rumble_strength", 25));
     recomp::set_gyro_sensitivity(from_or_default(config_json, "gyro_sensitivity", 50));
     recomp::set_mouse_sensitivity(from_or_default(config_json, "mouse_sensitivity", is_steam_deck ? 50 : 0));
     recomp::set_joystick_deadzone(from_or_default(config_json, "joystick_deadzone", 5));
-    zelda64::set_autosave_mode(from_or_default(config_json, "autosave_mode", zelda64::AutosaveMode::On));
-    zelda64::set_camera_invert_mode(from_or_default(config_json, "camera_invert_mode", zelda64::CameraInvertMode::InvertY));
-    zelda64::set_analog_cam_mode(from_or_default(config_json, "analog_cam_mode", zelda64::AnalogCamMode::Off));
-    zelda64::set_analog_camera_invert_mode(from_or_default(config_json, "analog_camera_invert_mode", zelda64::CameraInvertMode::InvertNone));
-    zelda64::set_debug_mode_enabled(from_or_default(config_json, "debug_mode", false));
+    pilotwings64::set_autosave_mode(from_or_default(config_json, "autosave_mode", pilotwings64::AutosaveMode::On));
+    pilotwings64::set_camera_invert_mode(from_or_default(config_json, "camera_invert_mode", pilotwings64::CameraInvertMode::InvertY));
+    pilotwings64::set_analog_cam_mode(from_or_default(config_json, "analog_cam_mode", pilotwings64::AnalogCamMode::Off));
+    pilotwings64::set_analog_camera_invert_mode(from_or_default(config_json, "analog_camera_invert_mode", pilotwings64::CameraInvertMode::InvertNone));
+    pilotwings64::set_debug_mode_enabled(from_or_default(config_json, "debug_mode", false));
 }
 
 bool load_general_config(const std::filesystem::path& path) {
@@ -313,20 +313,20 @@ void assign_all_mappings(recomp::InputDevice device, const recomp::DefaultN64Map
     assign_mapping_complete(device, recomp::GameInput::APPLY_MENU, values.apply_menu);
 };
 
-void zelda64::reset_input_bindings() {
+void pilotwings64::reset_input_bindings() {
     assign_all_mappings(recomp::InputDevice::Keyboard, recomp::default_n64_keyboard_mappings);
     assign_all_mappings(recomp::InputDevice::Controller, recomp::default_n64_controller_mappings);
 }
 
-void zelda64::reset_cont_input_bindings() {
+void pilotwings64::reset_cont_input_bindings() {
     assign_all_mappings(recomp::InputDevice::Controller, recomp::default_n64_controller_mappings);
 }
 
-void zelda64::reset_kb_input_bindings() {
+void pilotwings64::reset_kb_input_bindings() {
     assign_all_mappings(recomp::InputDevice::Keyboard, recomp::default_n64_keyboard_mappings);
 }
 
-void zelda64::reset_single_input_binding(recomp::InputDevice device, recomp::GameInput input) {
+void pilotwings64::reset_single_input_binding(recomp::InputDevice device, recomp::GameInput input) {
     assign_mapping_complete(
         device,
         input,
@@ -457,9 +457,9 @@ bool load_controls_config(const std::filesystem::path& path) {
 bool save_sound_config(const std::filesystem::path& path) {
     nlohmann::json config_json{};
 
-    config_json["main_volume"] = zelda64::get_main_volume();
-    config_json["bgm_volume"] = zelda64::get_bgm_volume();
-    config_json["low_health_beeps"] = zelda64::get_low_health_beeps_enabled();
+    config_json["main_volume"] = pilotwings64::get_main_volume();
+    config_json["bgm_volume"] = pilotwings64::get_bgm_volume();
+    config_json["low_health_beeps"] = pilotwings64::get_low_health_beeps_enabled();
 
     return save_json_with_backups(path, config_json);
 }
@@ -470,17 +470,17 @@ bool load_sound_config(const std::filesystem::path& path) {
         return false;
     }
 
-    zelda64::reset_sound_settings();
-    call_if_key_exists(zelda64::set_main_volume, config_json, "main_volume");
-    call_if_key_exists(zelda64::set_bgm_volume, config_json, "bgm_volume");
-    call_if_key_exists(zelda64::set_low_health_beeps_enabled, config_json, "low_health_beeps");
+    pilotwings64::reset_sound_settings();
+    call_if_key_exists(pilotwings64::set_main_volume, config_json, "main_volume");
+    call_if_key_exists(pilotwings64::set_bgm_volume, config_json, "bgm_volume");
+    call_if_key_exists(pilotwings64::set_low_health_beeps_enabled, config_json, "low_health_beeps");
     return true;
 }
 
-void zelda64::load_config() {
+void pilotwings64::load_config() {
     detect_steam_deck();
 
-    std::filesystem::path recomp_dir = zelda64::get_app_folder_path();
+    std::filesystem::path recomp_dir = pilotwings64::get_app_folder_path();
     std::filesystem::path general_path = recomp_dir / general_filename;
     std::filesystem::path graphics_path = recomp_dir / graphics_filename;
     std::filesystem::path controls_path = recomp_dir / controls_filename;
@@ -504,18 +504,18 @@ void zelda64::load_config() {
     }
 
     if (!load_controls_config(controls_path)) {
-        zelda64::reset_input_bindings();
+        pilotwings64::reset_input_bindings();
         save_controls_config(controls_path);
     }
 
     if (!load_sound_config(sound_path)) {
-        zelda64::reset_sound_settings();
+        pilotwings64::reset_sound_settings();
         save_sound_config(sound_path);
     }
 }
 
-void zelda64::save_config() {
-    std::filesystem::path recomp_dir = zelda64::get_app_folder_path();
+void pilotwings64::save_config() {
+    std::filesystem::path recomp_dir = pilotwings64::get_app_folder_path();
 
     if (recomp_dir.empty()) {
         return;

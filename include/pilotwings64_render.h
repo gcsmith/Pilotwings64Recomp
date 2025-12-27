@@ -1,5 +1,5 @@
-#ifndef __ZELDA_RENDER_H__
-#define __ZELDA_RENDER_H__
+#ifndef __PILOTWINGS64_RENDER_H__
+#define __PILOTWINGS64_RENDER_H__
 
 #include <unordered_set>
 #include <filesystem>
@@ -12,7 +12,7 @@ namespace RT64 {
     struct Application;
 }
 
-namespace zelda64 {
+namespace pilotwings64 {
     namespace renderer {
         inline const std::string special_option_texture_pack_enabled = "_recomp_texture_pack_enabled";
 

@@ -29,11 +29,11 @@
 
 #include "recomp_ui.h"
 #include "recomp_input.h"
-#include "zelda_config.h"
-#include "zelda_sound.h"
-#include "zelda_render.h"
-#include "zelda_support.h"
-#include "zelda_game.h"
+#include "pilotwings64_config.h"
+#include "pilotwings64_sound.h"
+#include "pilotwings64_render.h"
+#include "pilotwings64_support.h"
+#include "pilotwings64_game.h"
 #include "recomp_data.h"
 #include "ovl_patches.hpp"
 #include "librecomp/game.hpp"
@@ -144,7 +144,7 @@ ultramodern::renderer::WindowHandle create_window(ultramodern::gfx_callbacks_t::
     flags |= SDL_WINDOW_VULKAN;
 #endif
 
-    window = SDL_CreateWindow("Zelda 64: Recompiled", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1600, 960,  flags);
+    window = SDL_CreateWindow("Pilotwings 64: Recompiled", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1600, 960,  flags);
 #if defined(__linux__)
     SetImageAsIcon("icons/512.png",window);
     if (ultramodern::renderer::get_graphics_config().wm_option == ultramodern::renderer::WindowMode::Fullscreen) { // TODO: Remove once RT64 gets native fullscreen support on Linux
@@ -217,7 +217,7 @@ void queue_samples(int16_t* audio_data, size_t sample_count) {
 
     // Convert the audio from 16-bit values to floats and swap the audio channels into the
     // swap buffer to correct for the address xor caused by endianness handling.
-    float cur_main_volume = zelda64::get_main_volume() / 100.0f; // Get the current main volume, normalized to 0.0-1.0.
+    float cur_main_volume = pilotwings64::get_main_volume() / 100.0f; // Get the current main volume, normalized to 0.0-1.0.
     for (size_t i = 0; i < sample_count; i += input_channels) {
         swap_buffer[i + 0 + duplicated_input_frames * input_channels] = audio_data[i + 1] * (0.5f / 32768.0f) * cur_main_volume;
         swap_buffer[i + 1 + duplicated_input_frames * input_channels] = audio_data[i + 0] * (0.5f / 32768.0f) * cur_main_volume;
@@ -351,12 +351,12 @@ gpr get_entrypoint_address();
 std::vector<recomp::GameEntry> supported_games = {
     {
         .rom_hash = 0xEF18B4A9E2386169ULL,
-        .internal_name = "ZELDA MAJORA'S MASK",
-        .game_id = u8"mm.n64.us.1.0",
+        .internal_name = "Pilot Wings64",
+        .game_id = u8"pilotwings64.n64.us.1.0",
         .mod_game_id = "mm",
         .save_type = recomp::SaveType::Flashram,
         .is_enabled = false,
-        .decompression_routine = zelda64::decompress_mm,
+        .decompression_routine = pilotwings64::decompress_mm,
         .has_compressed_code = true,
         .entrypoint_address = get_entrypoint_address(),
         .entrypoint = recomp_entrypoint,
@@ -364,7 +364,7 @@ std::vector<recomp::GameEntry> supported_games = {
 };
 
 // TODO: move somewhere else
-namespace zelda64 {
+namespace pilotwings64 {
     std::string get_game_thread_name(const OSThread* t) {
         std::string name = "[Game] ";
 
@@ -555,15 +555,15 @@ void release_preload(PreloadContext& context) {
 #endif
 
 void enable_texture_pack(recomp::mods::ModContext& context, const recomp::mods::ModHandle& mod) {
-    zelda64::renderer::enable_texture_pack(context, mod);
+    pilotwings64::renderer::enable_texture_pack(context, mod);
 }
 
 void disable_texture_pack(recomp::mods::ModContext&, const recomp::mods::ModHandle& mod) {
-    zelda64::renderer::disable_texture_pack(mod);
+    pilotwings64::renderer::disable_texture_pack(mod);
 }
 
 void reorder_texture_pack(recomp::mods::ModContext&) {
-    zelda64::renderer::trigger_texture_pack_update();
+    pilotwings64::renderer::trigger_texture_pack_update();
 }
 
 #define REGISTER_FUNC(name) recomp::overlays::register_base_export(#name, name)
@@ -643,12 +643,12 @@ int main(int argc, char** argv) {
     reset_audio(48000);
 
     // Source controller mappings file
-    std::u8string controller_db_path = (zelda64::get_program_path() / "recompcontrollerdb.txt").u8string();
+    std::u8string controller_db_path = (pilotwings64::get_program_path() / "recompcontrollerdb.txt").u8string();
     if (SDL_GameControllerAddMappingsFromFile(reinterpret_cast<const char *>(controller_db_path.c_str())) < 0) {
         fprintf(stderr, "Failed to load controller mappings: %s\n", SDL_GetError());
     }
 
-    recomp::register_config_path(zelda64::get_app_folder_path());
+    recomp::register_config_path(pilotwings64::get_app_folder_path());
 
     // Register supported games and patches
     for (const auto& game : supported_games) {
@@ -673,17 +673,17 @@ int main(int argc, char** argv) {
     recompui::register_ui_exports();
     recomputil::register_data_api_exports();
 
-    zelda64::register_overlays();
-    zelda64::register_patches();
+    pilotwings64::register_overlays();
+    pilotwings64::register_patches();
     recomputil::init_extended_actor_data();
-    zelda64::load_config();
+    pilotwings64::load_config();
 
     recomp::rsp::callbacks_t rsp_callbacks{
         .get_rsp_microcode = get_rsp_microcode,
     };
 
     ultramodern::renderer::callbacks_t renderer_callbacks{
-        .create_render_context = zelda64::renderer::create_render_context,
+        .create_render_context = pilotwings64::renderer::create_render_context,
     };
 
     ultramodern::gfx_callbacks_t gfx_callbacks{
@@ -715,7 +715,7 @@ int main(int argc, char** argv) {
     };
 
     ultramodern::threads::callbacks_t threads_callbacks{
-        .get_game_thread_name = zelda64::get_game_thread_name,
+        .get_game_thread_name = pilotwings64::get_game_thread_name,
     };
 
     // Register the texture pack content type with rt64.json as its content file.

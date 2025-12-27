@@ -19,8 +19,8 @@
 #include "recomp_ui.h"
 #include "recomp_input.h"
 #include "librecomp/game.hpp"
-#include "zelda_config.h"
-#include "zelda_support.h"
+#include "pilotwings64_config.h"
+#include "pilotwings64_support.h"
 #include "ui_rml_hacks.hpp"
 #include "ui_elements.h"
 #include "ui_mod_menu.h"
@@ -227,14 +227,14 @@ public:
             };
 
             for (const FontFace& face : font_faces) {
-                auto font = zelda64::get_asset_path(face.filename);
+                auto font = pilotwings64::get_asset_path(face.filename);
                 Rml::LoadFontFace(font.string(), face.fallback_face);
             }
         }
     }
 
     void create_menus() {
-        recompui::init_styling(zelda64::get_asset_path("recomp.rcss"));
+        recompui::init_styling(pilotwings64::get_asset_path("recomp.rcss"));
         launcher_menu_controller->load_document();
         config_menu_controller->load_document();
         recompui::init_prompt_context();
@@ -643,7 +643,7 @@ void draw_hook(RT64::RenderCommandList* command_list, RT64::RenderFramebuffer* s
                 non_mouse_interacted = true;
                 kb_interacted = true;
                 if (cur_event.key.keysym.scancode == SDL_Scancode::SDL_SCANCODE_F8) {
-                    if (zelda64::get_debug_mode_enabled()) {
+                    if (pilotwings64::get_debug_mode_enabled()) {
                         Rml::Debugger::SetVisible(!Rml::Debugger::IsVisible());
                     }
                 }
@@ -793,7 +793,7 @@ void recompui::set_render_hooks() {
 }
 
 void recompui::message_box(const char* msg) {
-    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, zelda64::program_name.data(), msg, nullptr);
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, pilotwings64::program_name.data(), msg, nullptr);
     printf("[ERROR] %s\n", msg);
 }
 

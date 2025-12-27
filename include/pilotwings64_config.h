@@ -1,14 +1,14 @@
-#ifndef __ZELDA_CONFIG_H__
-#define __ZELDA_CONFIG_H__
+#ifndef __PILOTWINGS64_CONFIG_H__
+#define __PILOTWINGS64_CONFIG_H__
 
 #include <filesystem>
 #include <string_view>
 #include "ultramodern/config.hpp"
 #include "recomp_input.h"
 
-namespace zelda64 {
-    constexpr std::u8string_view program_id = u8"Zelda64Recompiled";
-    constexpr std::string_view program_name = "Zelda 64: Recompiled";
+namespace pilotwings64 {
+    constexpr std::u8string_view program_id = u8"Pilotwings64Recompiled";
+    constexpr std::string_view program_name = "Pilotwings 64: Recompiled";
 
     // TODO: Move loading configs to the runtime once we have a way to allow per-project customization.
     void load_config();
@@ -30,9 +30,9 @@ namespace zelda64 {
         OptionCount
     };
 
-    NLOHMANN_JSON_SERIALIZE_ENUM(zelda64::AutosaveMode, {
-        {zelda64::AutosaveMode::On, "On"},
-        {zelda64::AutosaveMode::Off, "Off"}
+    NLOHMANN_JSON_SERIALIZE_ENUM(pilotwings64::AutosaveMode, {
+        {pilotwings64::AutosaveMode::On, "On"},
+        {pilotwings64::AutosaveMode::Off, "Off"}
     });
 
     enum class TargetingMode {
@@ -41,9 +41,9 @@ namespace zelda64 {
         OptionCount
     };
 
-    NLOHMANN_JSON_SERIALIZE_ENUM(zelda64::TargetingMode, {
-        {zelda64::TargetingMode::Switch, "Switch"},
-        {zelda64::TargetingMode::Hold, "Hold"}
+    NLOHMANN_JSON_SERIALIZE_ENUM(pilotwings64::TargetingMode, {
+        {pilotwings64::TargetingMode::Switch, "Switch"},
+        {pilotwings64::TargetingMode::Hold, "Hold"}
     });
 
     TargetingMode get_targeting_mode();
@@ -57,11 +57,11 @@ namespace zelda64 {
         OptionCount
     };
 
-    NLOHMANN_JSON_SERIALIZE_ENUM(zelda64::CameraInvertMode, {
-        {zelda64::CameraInvertMode::InvertNone, "InvertNone"},
-        {zelda64::CameraInvertMode::InvertX, "InvertX"},
-        {zelda64::CameraInvertMode::InvertY, "InvertY"},
-        {zelda64::CameraInvertMode::InvertBoth, "InvertBoth"}
+    NLOHMANN_JSON_SERIALIZE_ENUM(pilotwings64::CameraInvertMode, {
+        {pilotwings64::CameraInvertMode::InvertNone, "InvertNone"},
+        {pilotwings64::CameraInvertMode::InvertX, "InvertX"},
+        {pilotwings64::CameraInvertMode::InvertY, "InvertY"},
+        {pilotwings64::CameraInvertMode::InvertBoth, "InvertBoth"}
     });
 
     CameraInvertMode get_camera_invert_mode();
@@ -76,9 +76,9 @@ namespace zelda64 {
 		OptionCount
     };
 
-    NLOHMANN_JSON_SERIALIZE_ENUM(zelda64::AnalogCamMode, {
-        {zelda64::AnalogCamMode::On, "On"},
-        {zelda64::AnalogCamMode::Off, "Off"}
+    NLOHMANN_JSON_SERIALIZE_ENUM(pilotwings64::AnalogCamMode, {
+        {pilotwings64::AnalogCamMode::On, "On"},
+        {pilotwings64::AnalogCamMode::Off, "Off"}
     });
 
     AutosaveMode get_autosave_mode();

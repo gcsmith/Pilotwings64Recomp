@@ -1,9 +1,9 @@
-#include "zelda_support.h"
+#include "pilotwings64_support.h"
 #include <SDL.h>
 #include "nfd.h"
 #include "RmlUi/Core.h"
 
-namespace zelda64 {
+namespace pilotwings64 {
     // MARK: - Internal Helpers
     void perform_file_dialog_operation(const std::function<void(bool, const std::filesystem::path&)>& callback) {
         nfdnchar_t* native_path = nullptr;

@@ -11,7 +11,7 @@
 #include "ultramodern/ultramodern.hpp"
 #include "ultramodern/config.hpp"
 
-#include "zelda_render.h"
+#include "pilotwings64_render.h"
 #include "recomp_ui.h"
 #include "concurrentqueue.h"
 
@@ -202,7 +202,7 @@ ultramodern::renderer::GraphicsApi map_graphics_api(RT64::UserConfiguration::Gra
     std::exit(EXIT_FAILURE);
 }
 
-zelda64::renderer::RT64Context::RT64Context(uint8_t* rdram, ultramodern::renderer::WindowHandle window_handle, bool debug) {
+pilotwings64::renderer::RT64Context::RT64Context(uint8_t* rdram, ultramodern::renderer::WindowHandle window_handle, bool debug) {
     static unsigned char dummy_rom_header[0x40];
     recompui::set_render_hooks();
 
@@ -316,26 +316,26 @@ zelda64::renderer::RT64Context::RT64Context(uint8_t* rdram, ultramodern::rendere
     high_precision_fb_enabled = app->shaderLibrary->usesHDR;
 }
 
-zelda64::renderer::RT64Context::~RT64Context() = default;
+pilotwings64::renderer::RT64Context::~RT64Context() = default;
 
-void zelda64::renderer::RT64Context::send_dl(const OSTask* task) {
+void pilotwings64::renderer::RT64Context::send_dl(const OSTask* task) {
     check_texture_pack_actions();
     app->state->rsp->reset();
     app->interpreter->loadUCodeGBI(task->t.ucode & 0x3FFFFFF, task->t.ucode_data & 0x3FFFFFF, true);
     app->processDisplayLists(app->core.RDRAM, task->t.data_ptr & 0x3FFFFFF, 0, true);
 }
 
-void zelda64::renderer::RT64Context::update_screen() {
+void pilotwings64::renderer::RT64Context::update_screen() {
     app->updateScreen();
 }
 
-void zelda64::renderer::RT64Context::shutdown() {
+void pilotwings64::renderer::RT64Context::shutdown() {
     if (app != nullptr) {
         app->end();
     }
 }
 
-bool zelda64::renderer::RT64Context::update_config(const ultramodern::renderer::GraphicsConfig& old_config, const ultramodern::renderer::GraphicsConfig& new_config) {
+bool pilotwings64::renderer::RT64Context::update_config(const ultramodern::renderer::GraphicsConfig& old_config, const ultramodern::renderer::GraphicsConfig& new_config) {
     if (old_config == new_config) {
         return false;
     }
@@ -354,18 +354,18 @@ bool zelda64::renderer::RT64Context::update_config(const ultramodern::renderer::
     return true;
 }
 
-void zelda64::renderer::RT64Context::enable_instant_present() {
+void pilotwings64::renderer::RT64Context::enable_instant_present() {
     // Enable the present early presentation mode for minimal latency.
     app->enhancementConfig.presentation.mode = RT64::EnhancementConfiguration::Presentation::Mode::PresentEarly;
 
     app->updateEnhancementConfig();
 }
 
-uint32_t zelda64::renderer::RT64Context::get_display_framerate() const {
+uint32_t pilotwings64::renderer::RT64Context::get_display_framerate() const {
     return app->presentQueue->ext.sharedResources->swapChainRate;
 }
 
-float zelda64::renderer::RT64Context::get_resolution_scale() const {
+float pilotwings64::renderer::RT64Context::get_resolution_scale() const {
     constexpr int ReferenceHeight = 240;
     switch (app->userConfig.resolution) {
         case RT64::UserConfiguration::Resolution::WindowIntegerScale:
@@ -383,7 +383,7 @@ float zelda64::renderer::RT64Context::get_resolution_scale() const {
     }
 }
 
-void zelda64::renderer::RT64Context::check_texture_pack_actions() {
+void pilotwings64::renderer::RT64Context::check_texture_pack_actions() {
     bool packs_changed = false;
     TexturePackAction cur_action;
     while (texture_pack_action_queue.try_dequeue(cur_action)) {
@@ -443,32 +443,32 @@ void zelda64::renderer::RT64Context::check_texture_pack_actions() {
     }
 }
 
-RT64::UserConfiguration::Antialiasing zelda64::renderer::RT64MaxMSAA() {
+RT64::UserConfiguration::Antialiasing pilotwings64::renderer::RT64MaxMSAA() {
     return device_max_msaa;
 }
 
-std::unique_ptr<ultramodern::renderer::RendererContext> zelda64::renderer::create_render_context(uint8_t* rdram, ultramodern::renderer::WindowHandle window_handle, bool developer_mode) {
-    return std::make_unique<zelda64::renderer::RT64Context>(rdram, window_handle, developer_mode);
+std::unique_ptr<ultramodern::renderer::RendererContext> pilotwings64::renderer::create_render_context(uint8_t* rdram, ultramodern::renderer::WindowHandle window_handle, bool developer_mode) {
+    return std::make_unique<pilotwings64::renderer::RT64Context>(rdram, window_handle, developer_mode);
 }
 
-bool zelda64::renderer::RT64SamplePositionsSupported() {
+bool pilotwings64::renderer::RT64SamplePositionsSupported() {
     return sample_positions_supported;
 }
 
-bool zelda64::renderer::RT64HighPrecisionFBEnabled() {
+bool pilotwings64::renderer::RT64HighPrecisionFBEnabled() {
     return high_precision_fb_enabled;
 }
 
-void zelda64::renderer::trigger_texture_pack_update() {
+void pilotwings64::renderer::trigger_texture_pack_update() {
     texture_pack_action_queue.enqueue(TexturePackUpdateAction{});
 }
 
-void zelda64::renderer::enable_texture_pack(const recomp::mods::ModContext& context, const recomp::mods::ModHandle& mod) {
+void pilotwings64::renderer::enable_texture_pack(const recomp::mods::ModContext& context, const recomp::mods::ModHandle& mod) {
     texture_pack_action_queue.enqueue(TexturePackEnableAction{mod.manifest.mod_id});
 
     // Check for the texture pack enabled config option.
     const recomp::mods::ConfigSchema& config_schema = context.get_mod_config_schema(mod.manifest.mod_id);
-    auto find_it = config_schema.options_by_id.find(zelda64::renderer::special_option_texture_pack_enabled);
+    auto find_it = config_schema.options_by_id.find(pilotwings64::renderer::special_option_texture_pack_enabled);
     if (find_it != config_schema.options_by_id.end()) {
         const recomp::mods::ConfigOption& config_option = config_schema.options[find_it->second];
 
@@ -483,35 +483,35 @@ void zelda64::renderer::enable_texture_pack(const recomp::mods::ModContext& cont
             }
 
             if (value) {
-                zelda64::renderer::secondary_enable_texture_pack(mod.manifest.mod_id);
+                pilotwings64::renderer::secondary_enable_texture_pack(mod.manifest.mod_id);
             }
             else {
-                zelda64::renderer::secondary_disable_texture_pack(mod.manifest.mod_id);
+                pilotwings64::renderer::secondary_disable_texture_pack(mod.manifest.mod_id);
             }
         }
     }
 }
 
-void zelda64::renderer::disable_texture_pack(const recomp::mods::ModHandle& mod) {
+void pilotwings64::renderer::disable_texture_pack(const recomp::mods::ModHandle& mod) {
     texture_pack_action_queue.enqueue(TexturePackDisableAction{mod.manifest.mod_id});
 }
 
-void zelda64::renderer::secondary_enable_texture_pack(const std::string& mod_id) {
+void pilotwings64::renderer::secondary_enable_texture_pack(const std::string& mod_id) {
     texture_pack_action_queue.enqueue(TexturePackSecondaryEnableAction{mod_id});
 }
 
-void zelda64::renderer::secondary_disable_texture_pack(const std::string& mod_id) {
+void pilotwings64::renderer::secondary_disable_texture_pack(const std::string& mod_id) {
     texture_pack_action_queue.enqueue(TexturePackSecondaryDisableAction{mod_id});
 }
 
 
 // HD texture enable option. Must be an enum with two options.
 // The first option is treated as disabled and the second option is treated as enabled.
-bool zelda64::renderer::is_texture_pack_enable_config_option(const recomp::mods::ConfigOption& option, bool show_errors) {
-    if (option.id == zelda64::renderer::special_option_texture_pack_enabled) {
+bool pilotwings64::renderer::is_texture_pack_enable_config_option(const recomp::mods::ConfigOption& option, bool show_errors) {
+    if (option.id == pilotwings64::renderer::special_option_texture_pack_enabled) {
         if (option.type != recomp::mods::ConfigOptionType::Enum) {
             if (show_errors) {
-                recompui::message_box(("Mod has the special config option id for enabling an HD texture pack (\"" + zelda64::renderer::special_option_texture_pack_enabled + "\"), but the config option is not an enum.").c_str());
+                recompui::message_box(("Mod has the special config option id for enabling an HD texture pack (\"" + pilotwings64::renderer::special_option_texture_pack_enabled + "\"), but the config option is not an enum.").c_str());
             }
             return false;
         }
@@ -519,7 +519,7 @@ bool zelda64::renderer::is_texture_pack_enable_config_option(const recomp::mods:
         const recomp::mods::ConfigOptionEnum &option_enum = std::get<recomp::mods::ConfigOptionEnum>(option.variant);
         if (option_enum.options.size() != 2) {
             if (show_errors) {
-                recompui::message_box(("Mod has the special config option id for enabling an HD texture pack (\"" + zelda64::renderer::special_option_texture_pack_enabled + "\"), but the config option doesn't have exactly 2 values.").c_str());
+                recompui::message_box(("Mod has the special config option id for enabling an HD texture pack (\"" + pilotwings64::renderer::special_option_texture_pack_enabled + "\"), but the config option doesn't have exactly 2 values.").c_str());
             }
             return false;
         }

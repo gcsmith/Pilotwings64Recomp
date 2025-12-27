@@ -1,10 +1,10 @@
 #include "recomp_ui.h"
 #include "recomp_input.h"
-#include "zelda_sound.h"
-#include "zelda_config.h"
-#include "zelda_debug.h"
-#include "zelda_render.h"
-#include "zelda_support.h"
+#include "pilotwings64_sound.h"
+#include "pilotwings64_config.h"
+#include "pilotwings64_debug.h"
+#include "pilotwings64_render.h"
+#include "pilotwings64_support.h"
 #include "promptfont.h"
 #include "ultramodern/config.hpp"
 #include "ultramodern/ultramodern.hpp"
@@ -150,7 +150,7 @@ void recomp::config_menu_set_cont_or_kb(bool cont_interacted) {
 }
 
 void close_config_menu_impl() {
-    zelda64::save_config();
+    pilotwings64::save_config();
 
     recompui::ContextId config_context = recompui::get_config_context_id();
     recompui::ContextId sub_menu_context = recompui::get_config_sub_menu_context_id();
@@ -211,7 +211,7 @@ void close_config_menu() {
     close_config_menu_impl();
 }
 
-void zelda64::open_quit_game_prompt() {
+void pilotwings64::open_quit_game_prompt() {
     recompui::open_choice_prompt(
         "Are you sure you want to quit?",
         "Any progress since your last save will be lost.",
@@ -234,12 +234,12 @@ struct ControlOptionsContext {
     int gyro_sensitivity; // 0 to 100
     int mouse_sensitivity; // 0 to 100
     int joystick_deadzone; // 0 to 100
-    zelda64::TargetingMode targeting_mode;
+    pilotwings64::TargetingMode targeting_mode;
     recomp::BackgroundInputMode background_input_mode;
-    zelda64::AutosaveMode autosave_mode;
-    zelda64::CameraInvertMode camera_invert_mode;
-    zelda64::AnalogCamMode analog_cam_mode;
-    zelda64::CameraInvertMode analog_camera_invert_mode;
+    pilotwings64::AutosaveMode autosave_mode;
+    pilotwings64::CameraInvertMode camera_invert_mode;
+    pilotwings64::AnalogCamMode analog_cam_mode;
+    pilotwings64::CameraInvertMode analog_camera_invert_mode;
 };
 
 ControlOptionsContext control_options_context;
@@ -288,11 +288,11 @@ void recomp::set_joystick_deadzone(int deadzone) {
     }
 }
 
-zelda64::TargetingMode zelda64::get_targeting_mode() {
+pilotwings64::TargetingMode pilotwings64::get_targeting_mode() {
     return control_options_context.targeting_mode;
 }
 
-void zelda64::set_targeting_mode(zelda64::TargetingMode mode) {
+void pilotwings64::set_targeting_mode(pilotwings64::TargetingMode mode) {
     control_options_context.targeting_mode = mode;
     if (general_model_handle) {
         general_model_handle.DirtyVariable("targeting_mode");
@@ -316,44 +316,44 @@ void recomp::set_background_input_mode(recomp::BackgroundInputMode mode) {
     );
 }
 
-zelda64::AutosaveMode zelda64::get_autosave_mode() {
+pilotwings64::AutosaveMode pilotwings64::get_autosave_mode() {
     return control_options_context.autosave_mode;
 }
 
-void zelda64::set_autosave_mode(zelda64::AutosaveMode mode) {
+void pilotwings64::set_autosave_mode(pilotwings64::AutosaveMode mode) {
     control_options_context.autosave_mode = mode;
     if (general_model_handle) {
         general_model_handle.DirtyVariable("autosave_mode");
     }
 }
 
-zelda64::CameraInvertMode zelda64::get_camera_invert_mode() {
+pilotwings64::CameraInvertMode pilotwings64::get_camera_invert_mode() {
     return control_options_context.camera_invert_mode;
 }
 
-void zelda64::set_camera_invert_mode(zelda64::CameraInvertMode mode) {
+void pilotwings64::set_camera_invert_mode(pilotwings64::CameraInvertMode mode) {
     control_options_context.camera_invert_mode = mode;
     if (general_model_handle) {
         general_model_handle.DirtyVariable("camera_invert_mode");
     }
 }
 
-zelda64::AnalogCamMode zelda64::get_analog_cam_mode() {
+pilotwings64::AnalogCamMode pilotwings64::get_analog_cam_mode() {
     return control_options_context.analog_cam_mode;
 }
 
-void zelda64::set_analog_cam_mode(zelda64::AnalogCamMode mode) {
+void pilotwings64::set_analog_cam_mode(pilotwings64::AnalogCamMode mode) {
     control_options_context.analog_cam_mode = mode;
     if (general_model_handle) {
         general_model_handle.DirtyVariable("analog_cam_mode");
     }
 }
 
-zelda64::CameraInvertMode zelda64::get_analog_camera_invert_mode() {
+pilotwings64::CameraInvertMode pilotwings64::get_analog_camera_invert_mode() {
     return control_options_context.analog_camera_invert_mode;
 }
 
-void zelda64::set_analog_camera_invert_mode(zelda64::CameraInvertMode mode) {
+void pilotwings64::set_analog_camera_invert_mode(pilotwings64::CameraInvertMode mode) {
     control_options_context.analog_camera_invert_mode = mode;
     if (general_model_handle) {
         general_model_handle.DirtyVariable("analog_camera_invert_mode");
@@ -376,43 +376,43 @@ struct SoundOptionsContext {
 
 SoundOptionsContext sound_options_context;
 
-void zelda64::reset_sound_settings() {
+void pilotwings64::reset_sound_settings() {
     sound_options_context.reset();
     if (sound_options_model_handle) {
         sound_options_model_handle.DirtyAllVariables();
     }
 }
 
-void zelda64::set_main_volume(int volume) {
+void pilotwings64::set_main_volume(int volume) {
     sound_options_context.main_volume.store(volume);
     if (sound_options_model_handle) {
         sound_options_model_handle.DirtyVariable("main_volume");
     }
 }
 
-int zelda64::get_main_volume() {
+int pilotwings64::get_main_volume() {
     return sound_options_context.main_volume.load();
 }
 
-void zelda64::set_bgm_volume(int volume) {
+void pilotwings64::set_bgm_volume(int volume) {
     sound_options_context.bgm_volume.store(volume);
     if (sound_options_model_handle) {
         sound_options_model_handle.DirtyVariable("bgm_volume");
     }
 }
 
-int zelda64::get_bgm_volume() {
+int pilotwings64::get_bgm_volume() {
     return sound_options_context.bgm_volume.load();
 }
 
-void zelda64::set_low_health_beeps_enabled(bool enabled) {
+void pilotwings64::set_low_health_beeps_enabled(bool enabled) {
     sound_options_context.low_health_beeps_enabled.store((int)enabled);
     if (sound_options_model_handle) {
         sound_options_model_handle.DirtyVariable("low_health_beeps_enabled");
     }
 }
 
-bool zelda64::get_low_health_beeps_enabled() {
+bool pilotwings64::get_low_health_beeps_enabled() {
     return (bool)sound_options_context.low_health_beeps_enabled.load();
 }
 
@@ -430,7 +430,7 @@ struct DebugContext {
     bool debug_enabled = false;
 
     DebugContext() {
-        for (const auto& area : zelda64::game_warps) {
+        for (const auto& area : pilotwings64::game_warps) {
             area_names.emplace_back(area.name);
         }
         update_warp_names();
@@ -438,11 +438,11 @@ struct DebugContext {
 
     void update_warp_names() {
         scene_names.clear();
-        for (const auto& scene : zelda64::game_warps[area_index].scenes) {
+        for (const auto& scene : pilotwings64::game_warps[area_index].scenes) {
             scene_names.emplace_back(scene.name);
         }
         
-        entrance_names = zelda64::game_warps[area_index].scenes[scene_index].entrances;
+        entrance_names = pilotwings64::game_warps[area_index].scenes[scene_index].entrances;
     }
 };
 
@@ -501,7 +501,7 @@ public:
 
     }
     void load_document() override {
-		config_context = recompui::create_context(zelda64::get_asset_path("config_menu.rml"));
+		config_context = recompui::create_context(pilotwings64::get_asset_path("config_menu.rml"));
         recompui::update_mod_list(false);
         recompui::get_config_tabset()->AddEventListener(Rml::EventId::Tabchange, &config_tabset_listener);
     }
@@ -540,7 +540,7 @@ public:
 
         recompui::register_event(listener, "open_quit_game_prompt",
             [](const std::string& param, Rml::Event& event) {
-                zelda64::open_quit_game_prompt();
+                pilotwings64::open_quit_game_prompt();
             });
 
         recompui::register_event(listener, "toggle_input_device",
@@ -575,12 +575,12 @@ public:
 
         recompui::register_event(listener, "do_warp",
             [](const std::string& param, Rml::Event& event) {
-                zelda64::do_warp(debug_context.area_index, debug_context.scene_index, debug_context.entrance_index);
+                pilotwings64::do_warp(debug_context.area_index, debug_context.scene_index, debug_context.entrance_index);
             });
 
         recompui::register_event(listener, "set_time",
             [](const std::string& param, Rml::Event& event) {
-                zelda64::set_time(debug_context.set_time_day, debug_context.set_time_hour, debug_context.set_time_minute);
+                pilotwings64::set_time(debug_context.set_time_day, debug_context.set_time_hour, debug_context.set_time_minute);
             });
     }
 
@@ -732,9 +732,9 @@ public:
         constructor.BindEventCallback("reset_input_bindings_to_defaults",
             [](Rml::DataModelHandle model_handle, Rml::Event& event, const Rml::VariantList& inputs) {
                 if (cur_device == recomp::InputDevice::Controller) {
-                    zelda64::reset_cont_input_bindings();
+                    pilotwings64::reset_cont_input_bindings();
                 } else {
-                    zelda64::reset_kb_input_bindings();
+                    pilotwings64::reset_kb_input_bindings();
                 }
                 model_handle.DirtyAllVariables();
                 nav_help_model_handle.DirtyVariable("nav_help__accept");
@@ -755,7 +755,7 @@ public:
         constructor.BindEventCallback("reset_single_input_binding_to_default",
             [](Rml::DataModelHandle model_handle, Rml::Event& event, const Rml::VariantList& inputs) {
                 recomp::GameInput input = static_cast<recomp::GameInput>(inputs.at(0).Get<size_t>());
-                zelda64::reset_single_input_binding(cur_device, input);
+                pilotwings64::reset_single_input_binding(cur_device, input);
                 model_handle.DirtyVariable("inputs");
                 nav_help_model_handle.DirtyVariable("nav_help__accept");
                 nav_help_model_handle.DirtyVariable("nav_help__exit");
@@ -988,11 +988,11 @@ std::unique_ptr<recompui::MenuController> recompui::create_config_menu() {
     return std::make_unique<ConfigMenu>();
 }
 
-bool zelda64::get_debug_mode_enabled() {
+bool pilotwings64::get_debug_mode_enabled() {
     return debug_context.debug_enabled;
 }
 
-void zelda64::set_debug_mode_enabled(bool enabled) {
+void pilotwings64::set_debug_mode_enabled(bool enabled) {
     debug_context.debug_enabled = enabled;
     if (debug_context.model_handle) {
         debug_context.model_handle.DirtyVariable("debug_enabled");
@@ -1000,10 +1000,10 @@ void zelda64::set_debug_mode_enabled(bool enabled) {
 }
 
 void recompui::update_supported_options() {
-    msaa2x_supported = zelda64::renderer::RT64MaxMSAA() >= RT64::UserConfiguration::Antialiasing::MSAA2X;
-    msaa4x_supported = zelda64::renderer::RT64MaxMSAA() >= RT64::UserConfiguration::Antialiasing::MSAA4X;
-    msaa8x_supported = zelda64::renderer::RT64MaxMSAA() >= RT64::UserConfiguration::Antialiasing::MSAA8X;
-    sample_positions_supported = zelda64::renderer::RT64SamplePositionsSupported();
+    msaa2x_supported = pilotwings64::renderer::RT64MaxMSAA() >= RT64::UserConfiguration::Antialiasing::MSAA2X;
+    msaa4x_supported = pilotwings64::renderer::RT64MaxMSAA() >= RT64::UserConfiguration::Antialiasing::MSAA4X;
+    msaa8x_supported = pilotwings64::renderer::RT64MaxMSAA() >= RT64::UserConfiguration::Antialiasing::MSAA8X;
+    sample_positions_supported = pilotwings64::renderer::RT64SamplePositionsSupported();
     
     new_options = ultramodern::renderer::get_graphics_config();
 

@@ -4,7 +4,7 @@
 #include "ultramodern/ultramodern.hpp"
 #include "recomp.h"
 #include "recomp_input.h"
-#include "zelda_config.h"
+#include "pilotwings64_config.h"
 #include "recomp_ui.h"
 #include "SDL.h"
 #include "promptfont.h"
@@ -160,7 +160,7 @@ bool sdl_event_filter(void* userdata, SDL_Event* event) {
             return true;
         }
 
-        zelda64::open_quit_game_prompt();
+        pilotwings64::open_quit_game_prompt();
         recompui::activate_mouse();
         break;
     }
@@ -503,10 +503,10 @@ void recomp::poll_inputs() {
         bool save_is_held = InputState.keys[SDL_SCANCODE_F5] != 0;
         bool load_is_held = InputState.keys[SDL_SCANCODE_F7] != 0;
         if (save_is_held && !save_was_held) {
-            zelda64::quicksave_save();
+            pilotwings64::quicksave_save();
         }
         else if (load_is_held && !load_was_held) {
-            zelda64::quicksave_load();
+            pilotwings64::quicksave_load();
         }
         save_was_held = save_is_held;
     }

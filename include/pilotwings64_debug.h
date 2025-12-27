@@ -1,10 +1,10 @@
-#ifndef __ZELDA_DEBUG_H__
-#define __ZELDA_DEBUG_H__
+#ifndef __PILOTWINGS64_DEBUG_H__
+#define __PILOTWINGS64_DEBUG_H__
 
 #include <vector>
 #include <string>
 
-namespace zelda64 {
+namespace pilotwings64 {
     struct SceneWarps {
         int index;
         std::string name;

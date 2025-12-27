@@ -1,11 +1,11 @@
-#include "zelda_support.h"
+#include "pilotwings64_support.h"
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 #import <objc/message.h>
 #include <SDL.h>
 #include "nfd.h"
 
-namespace zelda64 {
+namespace pilotwings64 {
     void dispatch_on_ui_thread(std::function<void()> func) {
         dispatch_async(dispatch_get_main_queue(), ^{
             func();

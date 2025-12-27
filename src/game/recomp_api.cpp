@@ -2,11 +2,11 @@
 
 #include "recomp.h"
 #include "librecomp/overlays.hpp"
-#include "zelda_config.h"
+#include "pilotwings64_config.h"
 #include "recomp_input.h"
 #include "recomp_ui.h"
-#include "zelda_render.h"
-#include "zelda_sound.h"
+#include "pilotwings64_render.h"
+#include "pilotwings64_sound.h"
 #include "librecomp/helpers.hpp"
 #include "../patches/input.h"
 #include "../patches/graphics.h"
@@ -87,15 +87,15 @@ extern "C" void recomp_get_target_aspect_ratio(uint8_t* rdram, recomp_context* c
 }
 
 extern "C" void recomp_get_targeting_mode(uint8_t* rdram, recomp_context* ctx) {
-    _return(ctx, static_cast<int>(zelda64::get_targeting_mode()));
+    _return(ctx, static_cast<int>(pilotwings64::get_targeting_mode()));
 }
 
 extern "C" void recomp_get_bgm_volume(uint8_t* rdram, recomp_context* ctx) {
-    _return(ctx, zelda64::get_bgm_volume() / 100.0f);
+    _return(ctx, pilotwings64::get_bgm_volume() / 100.0f);
 }
 
 extern "C" void recomp_get_low_health_beeps_enabled(uint8_t* rdram, recomp_context* ctx) {
-    _return(ctx, static_cast<u32>(zelda64::get_low_health_beeps_enabled()));
+    _return(ctx, static_cast<u32>(pilotwings64::get_low_health_beeps_enabled()));
 }
 
 extern "C" void recomp_time_us(uint8_t* rdram, recomp_context* ctx) {
@@ -103,7 +103,7 @@ extern "C" void recomp_time_us(uint8_t* rdram, recomp_context* ctx) {
 }
 
 extern "C" void recomp_get_autosave_enabled(uint8_t* rdram, recomp_context* ctx) {
-    _return(ctx, static_cast<s32>(zelda64::get_autosave_mode() == zelda64::AutosaveMode::On));
+    _return(ctx, static_cast<s32>(pilotwings64::get_autosave_mode() == pilotwings64::AutosaveMode::On));
 }
 
 extern "C" void recomp_load_overlays(uint8_t * rdram, recomp_context * ctx) {
@@ -115,7 +115,7 @@ extern "C" void recomp_load_overlays(uint8_t * rdram, recomp_context * ctx) {
 }
 
 extern "C" void recomp_high_precision_fb_enabled(uint8_t * rdram, recomp_context * ctx) {
-    _return(ctx, static_cast<s32>(zelda64::renderer::RT64HighPrecisionFBEnabled()));
+    _return(ctx, static_cast<s32>(pilotwings64::renderer::RT64HighPrecisionFBEnabled()));
 }
 
 extern "C" void recomp_get_resolution_scale(uint8_t* rdram, recomp_context* ctx) {
@@ -126,24 +126,24 @@ extern "C" void recomp_get_inverted_axes(uint8_t* rdram, recomp_context* ctx) {
     s32* x_out = _arg<0, s32*>(rdram, ctx);
     s32* y_out = _arg<1, s32*>(rdram, ctx);
 
-    zelda64::CameraInvertMode mode = zelda64::get_camera_invert_mode();
+    pilotwings64::CameraInvertMode mode = pilotwings64::get_camera_invert_mode();
 
-    *x_out = (mode == zelda64::CameraInvertMode::InvertX || mode == zelda64::CameraInvertMode::InvertBoth);
-    *y_out = (mode == zelda64::CameraInvertMode::InvertY || mode == zelda64::CameraInvertMode::InvertBoth);
+    *x_out = (mode == pilotwings64::CameraInvertMode::InvertX || mode == pilotwings64::CameraInvertMode::InvertBoth);
+    *y_out = (mode == pilotwings64::CameraInvertMode::InvertY || mode == pilotwings64::CameraInvertMode::InvertBoth);
 }
 
 extern "C" void recomp_get_analog_inverted_axes(uint8_t* rdram, recomp_context* ctx) {
     s32* x_out = _arg<0, s32*>(rdram, ctx);
     s32* y_out = _arg<1, s32*>(rdram, ctx);
 
-    zelda64::CameraInvertMode mode = zelda64::get_analog_camera_invert_mode();
+    pilotwings64::CameraInvertMode mode = pilotwings64::get_analog_camera_invert_mode();
 
-    *x_out = (mode == zelda64::CameraInvertMode::InvertX || mode == zelda64::CameraInvertMode::InvertBoth);
-    *y_out = (mode == zelda64::CameraInvertMode::InvertY || mode == zelda64::CameraInvertMode::InvertBoth);
+    *x_out = (mode == pilotwings64::CameraInvertMode::InvertX || mode == pilotwings64::CameraInvertMode::InvertBoth);
+    *y_out = (mode == pilotwings64::CameraInvertMode::InvertY || mode == pilotwings64::CameraInvertMode::InvertBoth);
 }
 
 extern "C" void recomp_get_analog_cam_enabled(uint8_t* rdram, recomp_context* ctx) {
-    _return<s32>(ctx, zelda64::get_analog_cam_mode() == zelda64::AnalogCamMode::On);
+    _return<s32>(ctx, pilotwings64::get_analog_cam_mode() == pilotwings64::AnalogCamMode::On);
 }
 
 extern "C" void recomp_get_camera_inputs(uint8_t* rdram, recomp_context* ctx) {

@@ -1,9 +1,9 @@
 #include <cstdint>
 #include <vector>
 #include <string>
-#include "zelda_debug.h"
+#include "pilotwings64_debug.h"
 
-std::vector<zelda64::AreaWarps> zelda64::game_warps {
+std::vector<pilotwings64::AreaWarps> pilotwings64::game_warps {
     { "Clock Town", {
         {
             0, "Mayor's Residence", {

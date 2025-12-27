@@ -1,8 +1,8 @@
 ﻿#include "ui_mod_menu.h"
 #include "ui_utils.h"
 #include "recomp_ui.h"
-#include "zelda_support.h"
-#include "zelda_render.h"
+#include "pilotwings64_support.h"
+#include "pilotwings64_render.h"
 
 #include "librecomp/mods.hpp"
 
@@ -275,7 +275,7 @@ void ModMenu::open_mods_folder() {
 }
 
 void ModMenu::open_install_dialog() {
-    zelda64::open_file_dialog_multiple([](bool success, const std::list<std::filesystem::path>& paths) {
+    pilotwings64::open_file_dialog_multiple([](bool success, const std::list<std::filesystem::path>& paths) {
         if (success) {
             ContextId old_context = recompui::try_close_current_context();
 
@@ -448,7 +448,7 @@ ContextId get_config_sub_menu_context_id() {
 }
 
 bool ModMenu::handle_special_config_options(const recomp::mods::ConfigOption& option, const recomp::mods::ConfigValueVariant& config_value) {
-    if (zelda64::renderer::is_texture_pack_enable_config_option(option, true)) {
+    if (pilotwings64::renderer::is_texture_pack_enable_config_option(option, true)) {
         const recomp::mods::ConfigOptionEnum &option_enum = std::get<recomp::mods::ConfigOptionEnum>(option.variant);
 
         config_sub_menu->add_radio_option(option.id, option.name, option.description, std::get<uint32_t>(config_value), option_enum.options,
@@ -541,10 +541,10 @@ void ModMenu::mod_number_option_changed(const std::string &id, double value) {
 void ModMenu::mod_hd_textures_enabled_changed(uint32_t value) {
     if (active_mod_index >= 0) {
         if (value) {
-            zelda64::renderer::secondary_enable_texture_pack(mod_details[active_mod_index].mod_id);
+            pilotwings64::renderer::secondary_enable_texture_pack(mod_details[active_mod_index].mod_id);
         }
         else {
-            zelda64::renderer::secondary_disable_texture_pack(mod_details[active_mod_index].mod_id);
+            pilotwings64::renderer::secondary_disable_texture_pack(mod_details[active_mod_index].mod_id);
         }
     }
 }
@@ -709,7 +709,7 @@ ModMenu::ModMenu(Element *parent) : Element(parent) {
 
     context.close();
 
-    sub_menu_context = recompui::create_context(zelda64::get_asset_path("config_sub_menu.rml"));
+    sub_menu_context = recompui::create_context(pilotwings64::get_asset_path("config_sub_menu.rml"));
     sub_menu_context.open();
     Rml::ElementDocument* sub_menu_doc = sub_menu_context.get_document();
     Rml::Element* config_sub_menu_generic = sub_menu_doc->GetElementById("config_sub_menu");

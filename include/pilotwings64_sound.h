@@ -1,7 +1,7 @@
-#ifndef __ZELDA_SOUND_H__
-#define __ZELDA_SOUND_H__
+#ifndef __PILOTWINGS64_SOUND_H__
+#define __PILOTWINGS64_SOUND_H__
 
-namespace zelda64 {
+namespace pilotwings64 {
     void reset_sound_settings();
     void set_main_volume(int volume);
     int get_main_volume();
