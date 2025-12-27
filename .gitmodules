@@ -1,3 +1,30 @@
 [submodule "Pilotwings64RecompSyms"]
 	path = Pilotwings64RecompSyms
 	url = https://github.com/gcsmith/Pilotwings64RecompSyms.git
+[submodule "lib/N64ModernRuntime"]
+	path = lib/N64ModernRuntime
+	url = https://github.com/N64Recomp/N64ModernRuntime.git
+[submodule "lib/RmlUi"]
+	path = lib/RmlUi
+	url = https://github.com/mikke89/RmlUi.git
+[submodule "lib/lunasvg"]
+	path = lib/lunasvg
+	url = https://github.com/sammycage/lunasvg.git
+[submodule "lib/rt64"]
+	path = lib/rt64
+	url = https://github.com/rt64/rt64.git
+[submodule "lib/GamepadMotionHelpers"]
+	path = lib/GamepadMotionHelpers
+	url = https://github.com/JibbSmart/GamepadMotionHelpers.git
+[submodule "lib/concurrentqueue"]
+	path = lib/concurrentqueue
+	url = https://github.com/cameron314/concurrentqueue.git
+[submodule "lib/freetype-windows-binaries"]
+	path = lib/freetype-windows-binaries
+	url = https://github.com/ubawurinna/freetype-windows-binaries.git
+[submodule "lib/sse2neon"]
+	path = lib/sse2neon
+	url = https://github.com/DLTcollab/sse2neon.git
+[submodule "lib/Pilotwings64Decomp"]
+	path = lib/Pilotwings64Decomp
+	url = https://github.com/gcsmith/Pilotwings64Decomp.git
