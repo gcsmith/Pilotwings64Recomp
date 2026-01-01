@@ -1,9 +1,15 @@
 # Pilotwings 64: Recompiled
-[Pilotwings 64: Recompiled](https://github.com/gcsmith/Pilotwings64Recomp) is a native port of Pilotwings 64 built using the [N64: Recompiled](https://github.com/Mr-Wiseguy/N64Recomp) static recompilation framework.
+[Pilotwings 64: Recompiled](https://github.com/gcsmith/Pilotwings64Recomp) is a project that uses [N64: Recompiled](https://github.com/Mr-Wiseguy/N64Recomp) to **statically recompile** Pilotwings 64 into a native port with many new features, enhancements, and extensive mod support. This project uses [RT64](https://github.com/rt64/rt64) as the rendering engine to provide graphical enhancements.
 
 This project is very early in development. The game is playable in its current state, but with some issues outlined below.
 
 Currently only tested on Apple M4 silicon, but Windows and Linux should also work and will be tested / supported soon.
+
+### [Check out the latest release here](https://github.com/sonicdcer/Starfox64Recomp/releases/latest).
+
+Join the [N64: Recompiled Community Discord](https://discord.gg/AWZThJ4dPf) to discuss this and other N64: Recompiled projects!
+
+[![Discord Invitation](https://discordapp.com/api/guilds/1374083583739826328/widget.png?style=banner2 'N64 Recomp')](https://discord.gg/AWZThJ4dPf)
 
 ## Table of Contents
 * [Known Issues](#known-issues)
