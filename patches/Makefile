@@ -7,7 +7,7 @@ CFLAGS   := -target mips -mips2 -mabi=32 -O2 -G0 -mno-abicalls -mno-odd-spreg -m
 			-fomit-frame-pointer -ffast-math -fno-unsafe-math-optimizations -fno-builtin-memset \
 			-Wall -Wextra -Wno-incompatible-library-redeclaration -Wno-unused-parameter -Wno-unknown-pragmas -Wno-unused-variable -Wno-unused-but-set-variable -Wno-missing-braces -Wno-unsupported-floating-point-opt -Wno-switch
 ASFLAGS   := -target mips -mips2 -mabi=32 -O2 -G0 -mno-abicalls -mno-odd-spreg -mno-check-zero-division
-CPPFLAGS := -nostdinc -D__sgi -DTARGET_N64 -D_LANGUAGE_C -DMIPS -I dummy_headers -I ../lib/Pilotwings64Decomp/include -I ../lib/Pilotwings64Decomp/tools/ultralib/include -I ../lib/rt64/include
+CPPFLAGS := -nostdinc -D__sgi -DTARGET_N64 -D_LANGUAGE_C -DMIPS -I dummy_headers -I ../lib/Pilotwings64Decomp/include -I ../lib/Pilotwings64Decomp/tools/ultralib/include -I ../lib/Pilotwings64Decomp/tools/ultralib/include/compiler/ido -I ../lib/rt64/include
 # CPPFLAGS := -nostdinc -D__sgi -DTARGET_N64 -D_LANGUAGE_C -DMIPS -I dummy_headers -I ../lib/Pilotwings64Decomp/include -I ../lib/Pilotwings64Decomp/include/PR -I ../lib/wr64/include/libc -I ../lib/rt64/include
 LDFLAGS  := -nostdlib -T patches.ld -T syms.ld -Map patches.map --unresolved-symbols=ignore-all --emit-relocs
 
