@@ -23,3 +23,21 @@ ignored = [
 # vram = 0x80040C8C
 # value = 0x03E00008 # jr $s3 -> jr $ra
 
+# Disable SP_STATUS_REG access (memory mapped registers not supported).
+[[patches.instruction]]
+func = "func_8022B65C"
+vram = 0x8022B678
+value = 0x00000000 # sw $t6, 0x10($t7) -> nop
+
+# Disable MFC0 register access (register index not supported).
+[[patches.instruction]]
+func = "func_80231A10"
+vram = 0x80231A10
+value = 0x00000000 # mfc0 $v0, $9 -> nop
+
+# Disable MTC0 register access (register index not supported).
+[[patches.instruction]]
+func = "func_80231A10"
+vram = 0x80231A18
+value = 0x00000000 # mtc0 $v0, $9 -> nop
+
