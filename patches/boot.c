@@ -10,25 +10,6 @@ extern s32 D_802B9C80;
 extern char app_ROM_START[];
 extern char app_ROM_END[];
 
-#if 0
-RECOMP_PATCH void Thread_App(s32 *data) {
-    u32 size = (((u32) &app_ROM_END - (u32) &app_ROM_START) + 0xF) & ~0xF;
-
-//  recomp_puts("overriding overlays\n", 18);
-    recomp_load_overlays((u32) app_ROM_START, &func_802CA900, size);
-
-#if 0
-    _uvMediaCopy(D_802CA900, (u32)&app_ROM_START, size);
-    uvMemSet(D_803571F0, 0, D_803805E0);
-    func_8030FE20(data);
-#else
-    _uvMediaCopy((void*)D_802CA900, &D_51E30, &D_DE720 - &D_51E30);
-    uvMemSet((void*)D_803571F0, 0, &D_803805E0 - &D_803571F0);
-    func_8030FE20(data);
-#endif
-}
-#endif
-
 RECOMP_PATCH void _uvDMA(void* vAddr, u32 devAddr, u32 nbytes) {
     s32 dest = (s32)vAddr;
     if (D_802B9C80 == 0) {

@@ -12,7 +12,6 @@ use_absolute_symbols = false
 
 [patches]
 stubs = [
-    "func_8023EDA0",
 ]
 
 ignored = [

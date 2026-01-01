@@ -1961,10 +1961,10 @@ scrollbarhorizontal sliderbar {
 .launcher__background-wrapper {
   display: flex;
   position: absolute;
-  top: -55vw;
+  top: 0vw;
   right: -100%;
-  bottom: -50vw;
-  left: -70vw;
+  bottom: -15vw;
+  left: -60vw;
   align-items: center;
   justify-content: flex-start;
   transform: translateX(0dp);
@@ -1976,7 +1976,7 @@ scrollbarhorizontal sliderbar {
     opacity: 0;
   }
   100% {
-    opacity: 0.1;
+    opacity: 0.33;
   }
 }
 .launcher__background-mm {
@@ -1986,8 +1986,8 @@ scrollbarhorizontal sliderbar {
   left: 0;
   width: auto;
   height: 100%;
-  animation: 2.5s cubic-in-out 1 fade-mm-in;
-  opacity: 0.1;
+  animation: 3.5s cubic-in-out 1 fade-mm-in;
+  opacity: 0.33;
 }
 
 .launcher__title-quadrant {
