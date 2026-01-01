@@ -5,7 +5,7 @@ This project is very early in development. The game is playable in its current s
 
 Currently only tested on Apple M4 silicon, but Windows and Linux should also work and will be tested / supported soon.
 
-### [Check out the latest release here](https://github.com/sonicdcer/Starfox64Recomp/releases/latest).
+### ~~[Check out the latest release here](https://github.com/gcsmith/Pilotwings64Recomp/releases/latest)~~ (coming soon).
 
 Join the [N64: Recompiled Community Discord](https://discord.gg/AWZThJ4dPf) to discuss this and other N64: Recompiled projects!
 
