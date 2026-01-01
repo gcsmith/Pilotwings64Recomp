@@ -1,7 +1,7 @@
 # Pilotwings 64: Recompiled
 [Pilotwings 64: Recompiled](https://github.com/gcsmith/Pilotwings64Recomp) is a native port of Pilotwings 64 built using the [N64: Recompiled](https://github.com/Mr-Wiseguy/N64Recomp) static recompilation framework.
 
-This project is very early in development. The game is currently playable, but with some issues outlined below.
+This project is very early in development. The game is currently playable, but with some issues outlined below. Currently only tested on Apple M4 silicon.
 
 ## Table of Contents
 * [Known Issues](#known-issues)
@@ -25,5 +25,5 @@ Instructions on how to build this project can be found in the [BUILDING.md](BUIL
 * [FreeType](https://freetype.org/) for font rendering, used by RmlUi  
 * [moodycamel::ConcurrentQueue](https://github.com/cameron314/concurrentqueue) for semaphores and fast, lock-free MPMC queues
 * [Gamepad Motion Helpers](https://github.com/JibbSmart/GamepadMotionHelpers) for sensor fusion and calibration algorithms to implement gyro aiming
-* [Pilotwings 64 Decompilation](https://github.com/gcsmith/Pilotwings64Decomp) for headers and some function definitions, used for making patches or some enhancements
-* [Ares emulator](https://github.com/ares-emulator/ares) for RSP vector instruction reference implementations, used in RSP recompilation
+* [Pilotwings64Decomp](https://github.com/gcsmith/Pilotwings64Decomp) for symbols, headers and function definitions used for making patches and enhancements
+* [ares](https://github.com/ares-emulator/ares) for RSP vector instruction reference implementations, used in RSP recompilation
