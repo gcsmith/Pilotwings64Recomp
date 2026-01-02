@@ -7,6 +7,7 @@
 #include <numeric>
 #include <stdexcept>
 #include <cinttypes>
+#include <format>
 
 #include "nfd.h"
 
@@ -369,74 +370,34 @@ namespace pilotwings64 {
         switch (t->id) {
             case 0:
                 switch (t->priority) {
-                    case 150:
+                    case 0x08:
                         name += "PIMGR";
                         break;
-
-                    case 254:
+                    case 0xFA:
+                        name += "RENDER";
+                        break;
+                    case 0xFE:
                         name += "VIMGR";
                         break;
-
                     default:
-                        name += std::to_string(t->id);
+                        name += std::format("ID{}_PRI{}", t->id, t->priority);
                         break;
                 }
                 break;
-
             case 1:
-                name += "IDLE";
+                name += "KERNEL";
                 break;
-
-            case 2:
-                switch (t->priority) {
-                    case 5:
-                        name += "SLOWLY";
-                        break;
-
-                    case 127:
-                        name += "FAULT";
-                        break;
-
-                    default:
-                        name += std::to_string(t->id);
-                        break;
-                }
-                break;
-
             case 3:
-                name += "MAIN";
+                name += "AUDIO";
                 break;
-
             case 4:
-                name += "GRAPH";
-                break;
-
-            case 5:
                 name += "SCHED";
                 break;
-
-            case 7:
-                name += "PADMGR";
+            case 6:
+                name += "APP";
                 break;
-
-            case 10:
-                name += "AUDIOMGR";
-                break;
-
-            case 13:
-                name += "FLASHROM";
-                break;
-
-            case 18:
-                name += "DMAMGR";
-                break;
-
-            case 19:
-                name += "IRQMGR";
-                break;
-
             default:
-                name += std::to_string(t->id);
+                name += std::format("ID{}_PRI{}", t->id, t->priority);
                 break;
         }
 
