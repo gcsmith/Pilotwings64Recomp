@@ -17,7 +17,6 @@ Join the [N64: Recompiled Community Discord](https://discord.gg/AWZThJ4dPf) to d
 * [Dependencies](#dependencies)
 
 ## Known Issues
-* Sound effects are currently missing.
 * Significant hitching between scene transitions (e.g. landing / crashing).
 
 ## Building
