@@ -14,20 +14,7 @@
 #include "ultramodern/ultramodern.hpp"
 #include "ultramodern/config.hpp"
 
-extern "C" void __osContGetInitData_recomp(uint8_t* rdram, recomp_context* ctx) { }
-extern "C" void __osEnqueueThread_recomp(uint8_t* rdram, recomp_context* ctx) { }
 extern "C" void __osGetCause_recomp(uint8_t* rdram, recomp_context* ctx) { }
-extern "C" void __osGetSR_recomp(uint8_t* rdram, recomp_context* ctx) { }
-extern "C" void __osPackRequestData_recomp(uint8_t* rdram, recomp_context* ctx) { }
-extern "C" void __osPopThread_recomp(uint8_t* rdram, recomp_context* ctx) { }
-extern "C" void __osSetSR_recomp(uint8_t* rdram, recomp_context* ctx) { }
-extern "C" void __osSiRawStartDma_recomp(uint8_t* rdram, recomp_context* ctx) { }
-extern "C" void __osSpRawReadIo_recomp(uint8_t* rdram, recomp_context* ctx) { }
-extern "C" void __osSpRawWriteIo_recomp(uint8_t* rdram, recomp_context* ctx) { }
-extern "C" void __osTimerInterrupt_recomp(uint8_t* rdram, recomp_context* ctx) { }
-extern "C" void __osViSwapContext_recomp(uint8_t* rdram, recomp_context* ctx) { }
-extern "C" void __rmonStopUserThreads_recomp(uint8_t* rdram, recomp_context* ctx) { }
-extern "C" void bzero_recomp(uint8_t* rdram, recomp_context* ctx) { }
 extern "C" void osMapTLBRdb_recomp(uint8_t* rdram, recomp_context* ctx) { }
 extern "C" void osPiRawReadIo_recomp(uint8_t* rdram, recomp_context* ctx) { }
 extern "C" void osPiWriteIo_recomp(uint8_t* rdram, recomp_context* ctx) { }
