@@ -1,5 +1,6 @@
 #include "patches.h"
 
+void _uvDebugPrintf(char* fmt, ...);
 extern ALSeqPlayer* D_80248C90;
 void func_80206150(s32 arg0);
 f64 uvClkGetSec(s32 clk_id);
