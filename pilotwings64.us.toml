@@ -23,7 +23,7 @@ ignored = [
 
 # Disable SP_STATUS_REG access (memory mapped registers not supported).
 [[patches.instruction]]
-func = "func_8022B65C"
+func = "_uvScDlistRecover"
 vram = 0x8022B678
 value = 0x00000000 # sw $t6, 0x10($t7) -> nop
 
