@@ -3,6 +3,9 @@
 
 ### ~~[Check out the latest release here](https://github.com/gcsmith/Pilotwings64Recomp/releases/latest)~~ (coming soon).
 
+> [!IMPORTANT]
+> This recomp is in early development. While it is currently playable, it is unpolished and lacks some basic features (e.g., border removal, widescreen support). Until then, this project must be built from the sources and is only made public for those that are either curious or interested in contributing.
+
 Join the [N64: Recompiled Community Discord](https://discord.gg/AWZThJ4dPf) to discuss this and other N64: Recompiled projects!
 
 [![Discord Invitation](https://discordapp.com/api/guilds/1374083583739826328/widget.png?style=banner2 'N64 Recomp')](https://discord.gg/AWZThJ4dPf)
