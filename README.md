@@ -1,3 +1,5 @@
+[![Discord](https://img.shields.io/discord/1465499203831730191?color=%237289DA&logo=discord&logoColor=%23FFFFFF)](https://discord.gg/F3mZdvHv)
+
 # Pilotwings 64: Recompiled
 [Pilotwings 64: Recompiled](https://github.com/gcsmith/Pilotwings64Recomp) is a project that uses [N64: Recompiled](https://github.com/Mr-Wiseguy/N64Recomp) to **statically recompile** Pilotwings 64 into a native port with many new features, enhancements, and extensive mod support. This project uses [RT64](https://github.com/rt64/rt64) as the rendering engine to provide graphical enhancements.
 
