@@ -1,18 +1,18 @@
 #include "patches.h"
 
 void _uvDebugPrintf(char* fmt, ...);
-void func_8022E2DC(char arg0);
+void uvWaitForMesg(char arg0);
 
-extern OSIoMesg D_802C32A8;
-extern OSMesgQueue D_802C32C0;
-extern s32 D_802B9C80;
+extern OSIoMesg gPiDmaBlockReq;
+extern OSMesgQueue gPiDmaQ;
+extern s32 gNmiAsserted;
 
 extern char app_ROM_START[];
 extern char app_ROM_END[];
 
 RECOMP_PATCH void _uvDMA(void* vAddr, u32 devAddr, u32 nbytes) {
     s32 dest = (s32)vAddr;
-    if (D_802B9C80 == 0) {
+    if (gNmiAsserted == 0) {
         if (dest % 8) {
             _uvDebugPrintf("_uvDMA: RAM address not 8 byte aligned 0x%x\n", dest);
             return;
@@ -35,9 +35,9 @@ RECOMP_PATCH void _uvDMA(void* vAddr, u32 devAddr, u32 nbytes) {
         }
 
         osWritebackDCache((void* )dest, (s32)nbytes);
-        osPiStartDma(&D_802C32A8, 0, 0, devAddr, (void*) dest, nbytes, &D_802C32C0);
+        osPiStartDma(&gPiDmaBlockReq, 0, 0, devAddr, (void*) dest, nbytes, &gPiDmaQ);
         osInvalDCache((void*)dest, (s32)nbytes);
-        func_8022E2DC(0);
+        uvWaitForMesg(0);
     }
 }
 
