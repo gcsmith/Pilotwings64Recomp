@@ -29,6 +29,11 @@ extern "C" void recomp_update_inputs(uint8_t* rdram, recomp_context* ctx) {
     recomp::poll_inputs();
 }
 
+extern "C" void recomp_puti(uint8_t* rdram, recomp_context* ctx) {
+    u32 value = _arg<0, u32>(rdram, ctx);
+    printf("%d\n", value);
+}
+
 extern "C" void recomp_puts(uint8_t* rdram, recomp_context* ctx) {
     PTR(char) cur_str = _arg<0, PTR(char)>(rdram, ctx);
     u32 length = _arg<1, u32>(rdram, ctx);

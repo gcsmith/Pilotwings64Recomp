@@ -42,7 +42,8 @@
 *.z64
 *.eeprom
 
-# Recompiler stuff
+# Generated directories
+build*/
 RecompiledFuncs/
 RecompiledPatches/
 N64Recomp

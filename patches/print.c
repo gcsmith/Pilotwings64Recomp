@@ -1,4 +1,5 @@
 #include "patches.h"
+#include "uv_string.h"
 
 #if 0
 #include "misc_funcs.h"
@@ -26,6 +27,14 @@ int recomp_printf(const char* fmt, ...) {
     return ret;
 }
 #endif
+
+RECOMP_PATCH void _uvDebugPrintf(char* fmt, ...) {
+    // TODO
+}
+
+RECOMP_PATCH void uvEmitterPrintf(const char* fmt, ...) {
+    // TODO
+}
 
 void dummyfunc(void) {
     return;

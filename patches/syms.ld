@@ -56,3 +56,4 @@ recomp_get_actor_spawn_index = 0x8F0000D4;
 osInvalDCache_recomp = 0x8F0000D8;
 osPiStartDma_recomp = 0x8F0000DC;
 yield_self_1ms = 0x8F0000E0;
+recomp_puti = 0x8F0000E4;
