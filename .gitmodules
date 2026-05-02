@@ -1,6 +1,3 @@
-[submodule "Pilotwings64RecompSyms"]
-	path = Pilotwings64RecompSyms
-	url = https://github.com/gcsmith/Pilotwings64RecompSyms.git
 [submodule "lib/N64ModernRuntime"]
 	path = lib/N64ModernRuntime
 	url = https://github.com/gcsmith/N64ModernRuntime.git
@@ -13,3 +10,6 @@
 [submodule "lib/RecompFrontend"]
 	path = lib/RecompFrontend
 	url = https://github.com/gcsmith/RecompFrontend.git
+[submodule "lib/Pilotwings64RecompSyms"]
+	path = lib/Pilotwings64RecompSyms
+	url = https://github.com/gcsmith/Pilotwings64RecompSyms.git
