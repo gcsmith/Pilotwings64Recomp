@@ -17,6 +17,7 @@
 extern "C" void __osGetCause_recomp(uint8_t* rdram, recomp_context* ctx) { }
 extern "C" void osMapTLBRdb_recomp(uint8_t* rdram, recomp_context* ctx) { }
 extern "C" void osPiRawReadIo_recomp(uint8_t* rdram, recomp_context* ctx) { }
+extern "C" void osPiReadIo_recomp(uint8_t* rdram, recomp_context* ctx) { }
 extern "C" void osPiWriteIo_recomp(uint8_t* rdram, recomp_context* ctx) { }
 extern "C" void recomp_clear_all_actor_data(uint8_t* rdram, recomp_context* ctx) { }
 extern "C" void recomp_create_actor_data(uint8_t* rdram, recomp_context* ctx) { }
