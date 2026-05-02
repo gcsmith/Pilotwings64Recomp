@@ -3,12 +3,12 @@
 #include "uv_graphics.h"
 
 RECOMP_PATCH void func_8034B688(void) {
-    uvGfx_80223A28(0xFFF);
+    uvGfxBindTexture(GFX_STATE_TEXTURE_NONE);
 #ifndef ENABLE_ENHANCEMENTS
-    uvVtxRect(0, 0x12, 0x13F, 0);
-    uvVtxRect(0, 0xEF, 0x13F, 0xE8);
-    uvVtxRect(0, 0xE8, 0xA, 0x12);
-    uvVtxRect(0x136, 0xE8, 0x13F, 0x12);
+    uvVtxRect(0, 18, 319, 0);
+    uvVtxRect(0, 239, 319, 232);
+    uvVtxRect(0, 232, 10, 18);
+    uvVtxRect(310, 232, 319, 18);
 #endif
 }
 
