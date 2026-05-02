@@ -9,36 +9,26 @@ on:
       N64RECOMP_COMMIT:
         type: string
         required: false
-        default: 'a13e5cff96686776b0e03baf23923e3c1927b770'
-      DXC_CHECKSUM:
-        type: string
-        required: false
-        default: '4e6f4e52989aca69739880b40b9f988357f15d10ca03284377b81f1502463ff5'
+        default: '2b6f05688de2abc7d86da5b4a89b84c2c6acbabe'
     secrets:
-      ZRE_REPO_WITH_PAT:
+      SECRET_PASSPHRASE:
+        required: true
+      SECRET_REPO:
+        required: true
+      SECRET_TOKEN:
         required: true
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   build-linux:
-    runs-on: ${{ format('blaze/compute/{0}-amd64', matrix.os) }}
-    container:
-      image: dcvz/n64recomp:ubuntu-18.04
-      volumes:
-        # create a volume that we'll use as the new source for the node binary
-        # https://github.com/actions/checkout/issues/1809
-        - /nodeoverride:/nodeoverride:rw,rshared
-        - /nodeoverride:/__e/node20:ro,rshared
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         type: [ Debug, Release ]
         os: [ ubuntu-22.04 ]
-    name: ubuntu-18.04 (x64, ${{ matrix.type }}, Native, AppImage)
+    name: ubuntu-22.04 (x64, ${{ matrix.type }}, Native)
     steps:
-      - name: Copy the Node20 binary
-        run: |
-          cp -r /node20217/* /nodeoverride/
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -47,11 +37,32 @@ jobs:
       - name: ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: ${{ matrix.os }}-z64re-ccache-${{ matrix.type }}-x64-${{ inputs.N64RECOMP_COMMIT }}
-      - name: Prepare Build
-        run: |-
-          git clone ${{ secrets.ZRE_REPO_WITH_PAT }}
-          unzip zre/files.zip > /dev/null 2>&1
+          key: ${{ matrix.os }}-pilotwings64-ccache-${{ matrix.type }}-x64-${{ inputs.N64RECOMP_COMMIT }}
+      - name: Get extra dependencies
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ secrets.SECRET_NAME }}
+          token: ${{ secrets.SECRET_TOKEN }}
+          path: extra
+      - name: Install Linux Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build libgtk-3-dev lld llvm clang-15 libfuse2
+          
+          # Install SDL2
+          echo ::group::install SDL2
+
+          # Enable ccache
+          export PATH="/usr/lib/ccache:/usr/local/opt/ccache/libexec:$PATH"
+
+          wget https://github.com/libsdl-org/SDL/releases/download/release-${{ inputs.SDL2_VERSION }}/SDL2-${{ inputs.SDL2_VERSION }}.tar.gz
+          tar -xzf SDL2-${{ inputs.SDL2_VERSION }}.tar.gz
+          cd SDL2-${{ inputs.SDL2_VERSION }}
+          ./configure
+          make -j 10
+          sudo make install
+          sudo cp -av /usr/local/lib/libSDL* /lib/x86_64-linux-gnu/
+          echo ::endgroup::
       - name: Build N64Recomp & RSPRecomp
         run: |
           git clone https://github.com/Mr-Wiseguy/N64Recomp.git --recurse-submodules N64RecompSource
@@ -72,48 +83,34 @@ jobs:
           cp cmake-build/RSPRecomp ..
       - name: Run N64Recomp & RSPRecomp
         run: |
-          ./N64Recomp us.rev1.toml
-          ./RSPRecomp aspMain.us.rev1.toml
-          ./RSPRecomp njpgdspMain.us.rev1.toml
-      - name: Hotpatch DXC into RT64's contrib
-        run: |
-          # check if dxc was updated before we replace it, to detect changes
-          echo ${{ inputs.DXC_CHECKSUM }} ./lib/rt64/src/contrib/dxc/bin/x64/dxc-linux | sha256sum --status -c -
-
-          cp -v /usr/local/lib/libdxcompiler.so ./lib/rt64/src/contrib/dxc/lib/x64/libdxcompiler.so
-          cp -v /usr/local/bin/dxc ./lib/rt64/src/contrib/dxc/bin/x64/dxc-linux
-      - name: Build ZeldaRecomp
+          # Copy extra dependencies to root directory
+          cp extra/* .
+          
+          ./N64Recomp pilotwings64.us.toml
+          ./RSPRecomp aspMain.us.toml
+      - name: Build Pilotwings64Recomp
         run: |-
           # enable ccache
           export PATH="/usr/lib/ccache:/usr/local/opt/ccache/libexec:$PATH"
           
-          cmake -DCMAKE_BUILD_TYPE=${{ matrix.type }} -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER=clang++-17 -DCMAKE_C_COMPILER=clang-17 -DCMAKE_MAKE_PROGRAM=ninja -G Ninja -S . -B cmake-build -DPATCHES_C_COMPILER=clang-17 -DPATCHES_LD=ld.lld-17
-          cmake --build cmake-build --config ${{ matrix.type }} --target Zelda64Recompiled -j $(nproc)
+          cmake -DCMAKE_BUILD_TYPE=${{ matrix.type }} -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER=clang++-15 -DCMAKE_C_COMPILER=clang-15 -DCMAKE_MAKE_PROGRAM=ninja -G Ninja -S . -B cmake-build -DPATCHES_C_COMPILER=clang-15 -DPATCHES_LD=ld.lld-15
+          cmake --build cmake-build --config ${{ matrix.type }} --target Pilotwings64Recompiled -j $(nproc)
       - name: Prepare Archive
         run: |
-          mv cmake-build/Zelda64Recompiled Zelda64Recompiled
-          rm -rf assets/scss
-          tar -czf Zelda64Recompiled.tar.gz Zelda64Recompiled assets/ recompcontrollerdb.txt
-      - name: Archive Zelda64Recomp
+          mv cmake-build/Pilotwings64Recompiled Pilotwings64Recompiled
+          tar -czf Pilotwings64Recompiled.tar.gz Pilotwings64Recompiled assets/ recompcontrollerdb.txt
+      - name: Archive Pilotwings64Recomp
         uses: actions/upload-artifact@v4
         with:
-          name: Zelda64Recompiled-${{ runner.os }}-X64-${{ matrix.type }}
-          path: Zelda64Recompiled.tar.gz
-      - name: Build AppImage
-        run: |-
-          ./.github/linux/appimage.sh 
-      - name: Zelda64Recomp AppImage
-        uses: actions/upload-artifact@v4
-        with:
-          name: Zelda64Recompiled-AppImage-X64-${{ matrix.type }}
-          path: Zelda64Recompiled-*.AppImage
+          name: Pilotwings64Recompiled-${{ runner.os }}-X64-${{ matrix.type }}
+          path: Pilotwings64Recompiled.tar.gz
   build-linux-arm64:
-    runs-on: ${{ format('blaze/compute/{0}', matrix.os) }}
+    runs-on: ubuntu-22.04-arm
     strategy:
       matrix:
         type: [ Debug, Release ]
         os: [ ubuntu-22.04 ]
-    name: ${{ matrix.os }} (arm64, ${{ matrix.type }}, Native, AppImage)
+    name: ${{ matrix.os }} (arm64, ${{ matrix.type }}, Native)
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -123,11 +120,11 @@ jobs:
       - name: ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: ${{ matrix.os }}-z64re-ccache-${{ matrix.type }}-arm64-${{ inputs.N64RECOMP_COMMIT }}
+          key: ${{ matrix.os }}-pilotwings64-ccache-${{ matrix.type }}-arm64-${{ inputs.N64RECOMP_COMMIT }}
       - name: Install Linux Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y ninja-build libsdl2-dev libgtk-3-dev lld llvm clang-15 libfuse2
+          sudo apt-get install -y ninja-build libgtk-3-dev lld llvm clang-15 libfuse2
           
           # Install SDL2
           echo ::group::install SDL2
@@ -143,11 +140,12 @@ jobs:
           sudo make install
           sudo cp -av /usr/local/lib/libSDL* /lib/aarch64-linux-gnu/
           echo ::endgroup::
-      - name: Prepare Build
-        run: |-
-          git clone ${{ secrets.ZRE_REPO_WITH_PAT }}
-          ./zre/process.sh
-          cp ./zre/mm_shader_cache.bin ./shadercache/
+      - name: Get extra dependencies
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ secrets.SECRET_NAME }}
+          token: ${{ secrets.SECRET_TOKEN }}
+          path: extra
       - name: Build N64Recomp & RSPRecomp
         run: |
           git clone https://github.com/Mr-Wiseguy/N64Recomp.git --recurse-submodules N64RecompSource
@@ -168,39 +166,33 @@ jobs:
           cp cmake-build/RSPRecomp ..
       - name: Run N64Recomp & RSPRecomp
         run: |
-          ./N64Recomp us.rev1.toml
-          ./RSPRecomp aspMain.us.rev1.toml
-          ./RSPRecomp njpgdspMain.us.rev1.toml
-      - name: Build ZeldaRecomp
+          # Copy extra dependencies to root directory
+          cp extra/* .
+          
+          ./N64Recomp pilotwings64.us.toml
+          ./RSPRecomp aspMain.us.toml
+      - name: Build Pilotwings64Recomp
         run: |-
           # enable ccache
           export PATH="/usr/lib/ccache:/usr/local/opt/ccache/libexec:$PATH"
           
           cmake -DCMAKE_BUILD_TYPE=${{ matrix.type }} -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER=clang++-15 -DCMAKE_C_COMPILER=clang-15 -DCMAKE_MAKE_PROGRAM=ninja -G Ninja -S . -B cmake-build
-          cmake --build cmake-build --config ${{ matrix.type }} --target Zelda64Recompiled -j $(nproc)
+          cmake --build cmake-build --config ${{ matrix.type }} --target Pilotwings64Recompiled -j $(nproc)
       - name: Prepare Archive
         run: |
-          mv cmake-build/Zelda64Recompiled Zelda64Recompiled
-          rm -rf assets/scss
-          tar -czf Zelda64Recompiled.tar.gz Zelda64Recompiled assets/ recompcontrollerdb.txt
-      - name: Archive Zelda64Recomp
+          mv cmake-build/Pilotwings64Recompiled Pilotwings64Recompiled
+          tar -czf Pilotwings64Recompiled.tar.gz Pilotwings64Recompiled assets/ recompcontrollerdb.txt
+      - name: Archive Pilotwings64Recomp
         uses: actions/upload-artifact@v4
         with:
-          name: Zelda64Recompiled-${{ runner.os }}-ARM64-${{ matrix.type }}
-          path: Zelda64Recompiled.tar.gz
-      - name: Prepare AppImage
-        run: ./.github/linux/appimage.sh 
-      - name: Zelda64Recomp AppImage
-        uses: actions/upload-artifact@v4
-        with:
-          name: Zelda64Recompiled-AppImage-ARM64-${{ matrix.type }}
-          path: Zelda64Recompiled-*.AppImage
+          name: Pilotwings64Recompiled-${{ runner.os }}-ARM64-${{ matrix.type }}
+          path: Pilotwings64Recompiled.tar.gz
   build-linux-flatpak:
     runs-on: ubuntu-latest
     env:
-      FLATPAK_ID: io.github.zelda64recomp.zelda64recomp
-      FREEDESKTOP_VERSION: 23.08
-      LLVM_VERSION: 18
+      FLATPAK_ID: io.github.pilotwings64recomp.pilotwings64recomp
+      FREEDESKTOP_VERSION: 25.08
+      LLVM_VERSION: 20
     strategy:
       matrix:
         type: [ Debug, Release ]
@@ -215,16 +207,18 @@ jobs:
       - name: ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: ${{ matrix.os }}-z64re-ccache-${{ matrix.type }}-x64-${{ inputs.N64RECOMP_COMMIT }}
+          key: ${{ matrix.os }}-pilotwings64-ccache-${{ matrix.type }}-x64-${{ inputs.N64RECOMP_COMMIT }}
       - name: Install Linux Dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y flatpak-builder ccache lld
 
-      - name: Prepare Build
-        run: |-
-          git clone ${{ secrets.ZRE_REPO_WITH_PAT }}
-          ./zre/process.sh
+      - name: Get extra dependencies
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ secrets.SECRET_NAME }}
+          token: ${{ secrets.SECRET_TOKEN }}
+          path: extra
 
       - name: Prepare Flatpak
         run: |
@@ -232,8 +226,9 @@ jobs:
           flatpak --user install -y flathub org.freedesktop.Sdk//${{ env.FREEDESKTOP_VERSION }}
           flatpak --user install -y flathub org.freedesktop.Sdk.Extension.llvm${{ env.LLVM_VERSION }}//${{ env.FREEDESKTOP_VERSION }}
 
-      - name: Build ZeldaRecomp
+      - name: Build Pilotwings64Recomp
         run: |-
+          cp extra/* .
           export CCACHE_DIR=/tmp/ccache
           git config --global protocol.file.allow always
           make -C patches CC=clang LD=ld.lld
@@ -243,7 +238,7 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Zelda64Recompiled-Flatpak-X64-${{ matrix.type }}
+          name: Pilotwings64Recompiled-Flatpak-X64-${{ matrix.type }}
           path: ./${{ env.FLATPAK_ID }}.flatpak
   build-windows:
     runs-on: windows-latest
@@ -260,7 +255,7 @@ jobs:
       - name: ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: ${{ runner.os }}-z64re-ccache-${{ matrix.type }}
+          key: ${{ runner.os }}-pilotwings64-ccache-${{ matrix.type }}
       - name: Install Windows Dependencies
         run: |
           choco install ninja
@@ -274,11 +269,12 @@ jobs:
           7z x LLVM.tar -oportable-llvm
       - name: Configure Developer Command Prompt
         uses: ilammy/msvc-dev-cmd@v1
-      - name: Prepare Build
-        run: |-
-          git clone ${{ secrets.ZRE_REPO_WITH_PAT }}
-          ./zre/process.ps1
-          cp ./zre/mm_shader_cache.bin ./shadercache/
+      - name: Get extra dependencies
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ secrets.SECRET_NAME }}
+          token: ${{ secrets.SECRET_TOKEN }}
+          path: extra
       - name: Build N64Recomp & RSPRecomp
         run: |
           git clone https://github.com/Mr-Wiseguy/N64Recomp.git --recurse-submodules N64RecompSource
@@ -299,10 +295,12 @@ jobs:
           cp cmake-build/RSPRecomp.exe ..
       - name: Run N64Recomp & RSPRecomp
         run: |
-          ./N64Recomp.exe us.rev1.toml
-          ./RSPRecomp.exe aspMain.us.rev1.toml
-          ./RSPRecomp.exe njpgdspMain.us.rev1.toml
-      - name: Build ZeldaRecomp
+          # Copy extra dependencies to root directory
+          cp extra/* .
+
+          ./N64Recomp pilotwings64.us.toml
+          ./RSPRecomp aspMain.us.toml
+      - name: Build Pilotwings64Recomp
         run: |-
           # enable ccache
           set $env:PATH="$env:USERPROFILE/.cargo/bin;$env:PATH"
@@ -312,23 +310,22 @@ jobs:
           $env:PATH = ($env:PATH -split ';' | Where-Object { $_ -ne 'C:\Program Files\LLVM\bin' }) -join ';'
 
           cmake -DCMAKE_BUILD_TYPE=${{ matrix.type }} -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER=clang-cl -DCMAKE_C_COMPILER=clang-cl -DCMAKE_MAKE_PROGRAM=ninja -DPATCHES_C_COMPILER="..\portable-llvm\LLVM-19.1.3-Windows-X64\bin\clang" -DPATCHES_LD="..\portable-llvm\LLVM-19.1.3-Windows-X64\bin\ld.lld" -G Ninja -S . -B cmake-build -DCMAKE_CXX_FLAGS="-Xclang -fexceptions -Xclang -fcxx-exceptions"
-          cmake --build cmake-build --config ${{ matrix.type }} --target Zelda64Recompiled -j $cpuCores
+          cmake --build cmake-build --config ${{ matrix.type }} --target Pilotwings64Recompiled -j $cpuCores
         env:
           SDL2_VERSION: ${{ inputs.SDL2_VERSION }}
       - name: Prepare Archive
         run: |
-          Move-Item -Path "cmake-build/Zelda64Recompiled.exe" -Destination "Zelda64Recompiled.exe"
+          Move-Item -Path "cmake-build/Pilotwings64Recompiled.exe" -Destination "Pilotwings64Recompiled.exe"
           Move-Item -Path "cmake-build/dxcompiler.dll" -Destination "dxcompiler.dll"
           Move-Item -Path "cmake-build/dxil.dll" -Destination "dxil.dll"
           Move-Item -Path "cmake-build/SDL2.dll" -Destination "SDL2.dll"
-          Move-Item -Path "cmake-build/Zelda64Recompiled.pdb" -Destination "Zelda64Recompiled.pdb"
-          Remove-Item -Path "assets/scss" -Recurse -Force
-      - name: Archive Zelda64Recomp
+          Move-Item -Path "cmake-build/Pilotwings64Recompiled.pdb" -Destination "Pilotwings64Recompiled.pdb"
+      - name: Archive Pilotwings64Recomp
         uses: actions/upload-artifact@v4
         with:
-          name: Zelda64Recompiled-${{ runner.os }}-${{ matrix.type }}
+          name: Pilotwings64Recompiled-${{ runner.os }}-${{ matrix.type }}
           path: |
-            Zelda64Recompiled.exe
+            Pilotwings64Recompiled.exe
             dxcompiler.dll
             dxil.dll
             SDL2.dll
@@ -337,11 +334,11 @@ jobs:
       - name: Archive Debug Files
         uses: actions/upload-artifact@v4
         with:
-          name: Zelda64Recompiled-PDB-${{ matrix.type }}
+          name: Pilotwings64Recompiled-PDB-${{ matrix.type }}
           path: |
-            Zelda64Recompiled.pdb
+            Pilotwings64Recompiled.pdb
   build-macos:
-    runs-on: blaze/macos-14
+    runs-on: macos-14
     strategy:
       matrix:
         type: [ Debug, Release ]
@@ -355,7 +352,7 @@ jobs:
       - name: ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: ${{ runner.os }}-z64re-ccache-${{ matrix.type }}
+          key: ${{ runner.os }}-pilotwings64-ccache-${{ matrix.type }}
       - name: Homebrew Setup
         run: |
           brew install ninja
@@ -365,11 +362,12 @@ jobs:
         id: 'macports'
         with:
           parameters: '.github/macos/macports.yaml'
-      - name: Prepare Build
-        run: |-
-          git clone ${{ secrets.ZRE_REPO_WITH_PAT }}
-          ./zre/process.sh
-          cp ./zre/mm_shader_cache.bin ./shadercache/
+      - name: Get extra dependencies
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ secrets.SECRET_NAME }}
+          token: ${{ secrets.SECRET_TOKEN }}
+          path: extra
       - name: Build N64Recomp & RSPRecomp
         run: |
           git clone https://github.com/Mr-Wiseguy/N64Recomp.git --recurse-submodules N64RecompSource
@@ -390,10 +388,12 @@ jobs:
           cp cmake-build/RSPRecomp ..
       - name: Run N64Recomp & RSPRecomp
         run: |
-          ./N64Recomp us.rev1.toml
-          ./RSPRecomp aspMain.us.rev1.toml
-          ./RSPRecomp njpgdspMain.us.rev1.toml
-      - name: Build ZeldaRecomp
+          # Copy extra dependencies to root directory
+          cp extra/* .
+          
+          ./N64Recomp pilotwings64.us.toml
+          ./RSPRecomp aspMain.us.toml
+      - name: Build Pilotwings64Recomp
         run: |-
           # enable ccache
           export PATH="/usr/lib/ccache:/usr/local/opt/ccache/libexec:$PATH"
@@ -401,13 +401,13 @@ jobs:
           cmake -DCMAKE_BUILD_TYPE=${{ matrix.type }} -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_MAKE_PROGRAM=ninja -G Ninja -S . -B cmake-build \
           -DPATCHES_LD=/opt/local/bin/ld.lld-mp-18 -DCMAKE_AR=/opt/local/bin/llvm-ar-mp-18 -DPATCHES_C_COMPILER=/opt/local/bin/clang-mp-18 \
           -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"
-          cmake --build cmake-build --config ${{ matrix.type }} --target Zelda64Recompiled -j $(sysctl -n hw.ncpu)
+          cmake --build cmake-build --config ${{ matrix.type }} --target Pilotwings64Recompiled -j $(sysctl -n hw.ncpu)
       - name: Prepare Archive
         run: |
-          mv cmake-build/Zelda64Recompiled.app Zelda64Recompiled.app
-          zip -r -y Zelda64Recompiled.zip Zelda64Recompiled.app
-      - name: Archive Zelda64Recomp
+          mv cmake-build/Pilotwings64Recompiled.app Pilotwings64Recompiled.app
+          zip -r -y Pilotwings64Recompiled.zip Pilotwings64Recompiled.app
+      - name: Archive Pilotwings64Recomp
         uses: actions/upload-artifact@v4
         with:
-          name: Zelda64Recompiled-${{ runner.os }}-${{ matrix.type }}
-          path: Zelda64Recompiled.zip
+          name: Pilotwings64Recompiled-${{ runner.os }}-${{ matrix.type }}
+          path: Pilotwings64Recompiled.zip
