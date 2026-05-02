@@ -13,6 +13,7 @@
 
 #include "ultramodern/ultra64.h"
 #include "ultramodern/ultramodern.hpp"
+#include "ultramodern/config.hpp"
 #define SDL_MAIN_HANDLED
 #ifdef _WIN32
 #include "SDL.h"
@@ -28,15 +29,21 @@
 #undef Always
 #endif
 
-#include "recomp_ui.h"
-#include "recomp_input.h"
+#include "recompui/recompui.h"
+#include "recompui/program_config.h"
+#include "recompui/renderer.h"
+#include "recompui/config.h"
+#include "util/file.h"
+#include "recompinput/input_events.h"
+#include "recompinput/recompinput.h"
+#include "recompinput/profiles.h"
 #include "pilotwings64_config.h"
 #include "pilotwings64_sound.h"
-#include "pilotwings64_render.h"
-#include "pilotwings64_support.h"
 #include "pilotwings64_game.h"
+#include "pilotwings64_launcher.h"
 #include "recomp_data.h"
 #include "ovl_patches.hpp"
+#include "theme.h"
 #include "librecomp/game.hpp"
 #include "librecomp/mods.hpp"
 #include "librecomp/helpers.hpp"
@@ -46,13 +53,13 @@
 #include "../../patches/sound.h"
 #include "../../patches/misc_funcs.h"
 
-// #include "mods/mm_recomp_dpad_builtin.h"
-
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <timeapi.h>
 #include "SDL_syswm.h"
+#define APP_ICON_B 1
+#define APP_ICON_K 2
 #endif
 
 #include "../../lib/rt64/src/contrib/stb/stb_image.h"
@@ -76,7 +83,7 @@ ultramodern::gfx_callbacks_t::gfx_data_t create_gfx() {
     SDL_SetHint(SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
     SDL_SetHint(SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS, "1");
 
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER) > 0) {
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER | SDL_INIT_JOYSTICK | SDL_INIT_HAPTIC) > 0) {
         exit_error("Failed to initialize SDL2: %s\n", SDL_GetError());
     }
 
@@ -85,9 +92,23 @@ ultramodern::gfx_callbacks_t::gfx_data_t create_gfx() {
     return {};
 }
 
-#if defined(__gnu_linux__)
+ultramodern::input::connected_device_info_t get_connected_device_info(int controller_num) {
+    if (recompinput::players::is_single_player_mode() || recompinput::players::get_player_is_assigned(controller_num)) {
+        return ultramodern::input::connected_device_info_t{
+            .connected_device = ultramodern::input::Device::Controller,
+            .connected_pak = ultramodern::input::Pak::RumblePak,
+        };
+    }
+
+    return ultramodern::input::connected_device_info_t{
+        .connected_device = ultramodern::input::Device::None,
+        .connected_pak = ultramodern::input::Pak::None,
+    };
+}
+
 #include "icon_bytes.h"
 
+#if defined(__gnu_linux__)
 bool SetImageAsIcon(const char* filename, SDL_Window* window)
 {
     // Read data
@@ -145,15 +166,7 @@ ultramodern::renderer::WindowHandle create_window(ultramodern::gfx_callbacks_t::
     flags |= SDL_WINDOW_VULKAN;
 #endif
 
-    window = SDL_CreateWindow("Pilotwings 64: Recompiled", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1600, 960,  flags);
-#if defined(__linux__)
-    SetImageAsIcon("icons/512.png",window);
-    if (ultramodern::renderer::get_graphics_config().wm_option == ultramodern::renderer::WindowMode::Fullscreen) { // TODO: Remove once RT64 gets native fullscreen support on Linux
-        SDL_SetWindowFullscreen(window,SDL_WINDOW_FULLSCREEN_DESKTOP);
-    } else {
-        SDL_SetWindowFullscreen(window,0);
-    }
-#endif
+    window = SDL_CreateWindow("Pilotwings 64: Recompiled", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1600, 900,  flags);
 
     if (window == nullptr) {
         exit_error("Failed to create window: %s\n", SDL_GetError());
@@ -162,6 +175,10 @@ ultramodern::renderer::WindowHandle create_window(ultramodern::gfx_callbacks_t::
     SDL_SysWMinfo wmInfo;
     SDL_VERSION(&wmInfo.version);
     SDL_GetWindowWMInfo(window, &wmInfo);
+
+#if defined(__linux__)
+    SetImageAsIcon("icons/512.png",window);
+#endif
 
 #if defined(_WIN32)
     return ultramodern::renderer::WindowHandle{ wmInfo.info.win.window, GetCurrentThreadId() };
@@ -176,7 +193,7 @@ ultramodern::renderer::WindowHandle create_window(ultramodern::gfx_callbacks_t::
 }
 
 void update_gfx(void*) {
-    recomp::handle_events();
+    recompinput::handle_events();
 }
 
 static SDL_AudioCVT audio_convert;
@@ -218,7 +235,7 @@ void queue_samples(int16_t* audio_data, size_t sample_count) {
 
     // Convert the audio from 16-bit values to floats and swap the audio channels into the
     // swap buffer to correct for the address xor caused by endianness handling.
-    float cur_main_volume = pilotwings64::get_main_volume() / 100.0f; // Get the current main volume, normalized to 0.0-1.0.
+    float cur_main_volume = static_cast<float>(recompui::config::sound::get_main_volume()) / 100.0f; // Get the current main volume, normalized to 0.0-1.0.
     for (size_t i = 0; i < sample_count; i += input_channels) {
         swap_buffer[i + 0 + duplicated_input_frames * input_channels] = audio_data[i + 1] * (0.5f / 32768.0f) * cur_main_volume;
         swap_buffer[i + 1 + duplicated_input_frames * input_channels] = audio_data[i + 0] * (0.5f / 32768.0f) * cur_main_volume;
@@ -304,7 +321,7 @@ void set_frequency(uint32_t freq) {
     update_audio_converter();
 }
 
-void reset_audio(uint32_t output_freq) {
+bool reset_audio(uint32_t output_freq) {
     SDL_AudioSpec spec_desired{
         .freq = (int)output_freq,
         .format = AUDIO_F32,
@@ -317,27 +334,27 @@ void reset_audio(uint32_t output_freq) {
         .userdata = nullptr
     };
 
-
     audio_device = SDL_OpenAudioDevice(nullptr, false, &spec_desired, nullptr, 0);
     if (audio_device == 0) {
-        exit_error("SDL error opening audio device: %s\n", SDL_GetError());
+        std::string audio_error = std::string("No audio device could be found. Please make sure an audio device is available.\nError opening audio device: ") + std::string(SDL_GetError());
+        recompui::message_box(audio_error.c_str());
+        return false;
     }
+
     SDL_PauseAudioDevice(audio_device, 0);
 
     output_sample_rate = output_freq;
     update_audio_converter();
+
+    return true;
 }
 
-// extern RspUcodeFunc njpgdspMain;
 extern RspUcodeFunc aspMain;
 
 RspUcodeFunc* get_rsp_microcode(const OSTask* task) {
     switch (task->t.type) {
     case M_AUDTASK:
         return aspMain;
-
-    // case M_NJPEGTASK:
-    //     return njpgdspMain;
 
     default:
         fprintf(stderr, "Unknown task: %" PRIu32 "\n", task->t.type);
@@ -353,12 +370,16 @@ std::vector<recomp::GameEntry> supported_games = {
     {
         .rom_hash = 0x887ab02583c90111ULL,
         .internal_name = "Pilot Wings64",
+        .display_name = "Pilotwings 64",
         .game_id = u8"pilotwings64.n64.us.1.0",
         .mod_game_id = "pilotwings64",
         .save_type = recomp::SaveType::Eep4k,
+        .thumbnail_bytes = std::span<const char>(icon_bytes),
         .is_enabled = false,
+        .has_compressed_code = false,
         .entrypoint_address = get_entrypoint_address(),
         .entrypoint = recomp_entrypoint,
+        .on_init_callback = {},
     },
 };
 
@@ -497,13 +518,25 @@ void release_preload(PreloadContext& context) {
     context = {};
 }
 
-#else
+#elif defined(__linux__) || defined(APPLE)
 
 struct PreloadContext {
 
 };
 
-// TODO implement on other platforms
+bool preload_executable(PreloadContext& context) {
+    // Preloading isn't implemented on Linux and MacOS, but it's also unnecessary there, as the OS already preloads the executable.
+    // Therefore, we can just consider the executable to be preloaded.
+    return true;
+}
+
+void release_preload(PreloadContext& context) {
+}
+
+#else
+
+struct PreloadContext {};
+
 bool preload_executable(PreloadContext& context) {
     return false;
 }
@@ -514,15 +547,55 @@ void release_preload(PreloadContext& context) {
 #endif
 
 void enable_texture_pack(recomp::mods::ModContext& context, const recomp::mods::ModHandle& mod) {
-    pilotwings64::renderer::enable_texture_pack(context, mod);
+    recompui::renderer::enable_texture_pack(context, mod);
 }
 
 void disable_texture_pack(recomp::mods::ModContext&, const recomp::mods::ModHandle& mod) {
-    pilotwings64::renderer::disable_texture_pack(mod);
+    recompui::renderer::disable_texture_pack(mod);
 }
 
 void reorder_texture_pack(recomp::mods::ModContext&) {
-    pilotwings64::renderer::trigger_texture_pack_update();
+    recompui::renderer::trigger_texture_pack_update();
+}
+
+void on_launcher_init(recompui::LauncherMenu *menu) {
+    auto game_options_menu = menu->init_game_options_menu(
+        supported_games[0].game_id,
+        supported_games[0].mod_game_id,
+        supported_games[0].display_name,
+        supported_games[0].thumbnail_bytes,
+        recompui::GameOptionsMenuLayout::Center
+    );
+
+    game_options_menu->add_default_options();
+    game_options_menu->set_width(30, recompui::Unit::Percent);
+
+    for (auto option : game_options_menu->get_options()) {
+        option->set_justify_content(recompui::JustifyContent::FlexEnd);
+        option->set_border_radius(0);
+
+        std::vector<recompui::Style *> hover_focus = {&option->hover_style, &option->focus_style};
+        for (auto style : hover_focus) {
+            style->set_background_color(recompui::theme::color::Transparent);
+        }
+    }
+
+    recompui::Element *menu_container = menu->get_menu_container();
+    menu_container->set_width(1440);
+    menu_container->unset_left();
+    menu_container->set_top(pilotwings64::launcher_options_top_offset);
+    menu_container->set_bottom(-pilotwings64::launcher_options_top_offset);
+    menu_container->set_right(50, recompui::Unit::Percent);
+    menu_container->set_translate_2D(50.0f, 0.0f, recompui::Unit::Percent);
+
+    game_options_menu->unset_left();
+    game_options_menu->set_bottom(50.0f, recompui::Unit::Percent);
+    game_options_menu->set_translate_2D(0.0f, 50.0f, recompui::Unit::Percent);
+    game_options_menu->set_right(pilotwings64::launcher_options_right_position_start);
+
+    menu->remove_default_title();
+
+    pilotwings64::launcher_animation_setup(menu);
 }
 
 #define REGISTER_FUNC(name) recomp::overlays::register_base_export(#name, name)
@@ -544,6 +617,9 @@ int main(int argc, char** argv) {
     if (!preloaded) {
         fprintf(stderr, "Failed to preload executable!\n");
     }
+
+    // Initialize random seed for icon easter egg.
+    std::srand(std::time(nullptr));
 
 #ifdef _WIN32
     // Set up high resolution timing period.
@@ -568,9 +644,6 @@ int main(int argc, char** argv) {
 
     // Set up console output to accept UTF-8 on windows
     SetConsoleOutputCP(CP_UTF8);
-
-    // Initialize native file dialogs.
-    NFD_Init();
 
     // Change to a font that supports Japanese characters
     CONSOLE_FONT_INFOEX cfi;
@@ -597,36 +670,44 @@ int main(int argc, char** argv) {
     std::filesystem::current_path("/var/data", ec);
 #endif
 
+    // Initialize native file dialogs.
+    NFD_Init();
+
+    // Initialize program settings.
+    recompui::programconfig::set_program_name(pilotwings64::program_name);
+    recompui::programconfig::set_program_id(pilotwings64::program_id);
+    
     // Initialize SDL audio and set the output frequency.
     SDL_InitSubSystem(SDL_INIT_AUDIO);
-    reset_audio(48000);
+    if (!reset_audio(48000)) {
+        // It is not possible to initialize without an audio device.
+        return EXIT_FAILURE;
+    }
 
     // Source controller mappings file
-    std::u8string controller_db_path = (pilotwings64::get_program_path() / "recompcontrollerdb.txt").u8string();
+    std::u8string controller_db_path = (recompui::file::get_program_path() / "recompcontrollerdb.txt").u8string();
     if (SDL_GameControllerAddMappingsFromFile(reinterpret_cast<const char *>(controller_db_path.c_str())) < 0) {
         fprintf(stderr, "Failed to load controller mappings: %s\n", SDL_GetError());
     }
 
-    recomp::register_config_path(pilotwings64::get_app_folder_path());
+    // Register fonts.
+    recompui::register_primary_font("InterVariable.ttf", "Inter Variable");
+    recompui::register_extra_font("Suplexmentary Comic NC.ttf");
+
+    // Register configuration path.
+    recomp::register_config_path(recompui::file::get_app_folder_path());
 
     // Register supported games and patches
     for (const auto& game : supported_games) {
         recomp::register_game(game);
     }
 
-    //recomp::mods::register_embedded_mod("mm_recomp_dpad_builtin", { (const uint8_t*)(mm_recomp_dpad_builtin), std::size(mm_recomp_dpad_builtin)});
-
     REGISTER_FUNC(recomp_get_window_resolution);
     REGISTER_FUNC(recomp_get_target_aspect_ratio);
     REGISTER_FUNC(recomp_get_target_framerate);
-    REGISTER_FUNC(recomp_get_autosave_enabled);
     REGISTER_FUNC(recomp_get_analog_cam_enabled);
     REGISTER_FUNC(recomp_get_camera_inputs);
-    REGISTER_FUNC(recomp_get_targeting_mode);
     REGISTER_FUNC(recomp_get_bgm_volume);
-    REGISTER_FUNC(recomp_get_low_health_beeps_enabled);
-    REGISTER_FUNC(recomp_get_gyro_deltas);
-    REGISTER_FUNC(recomp_get_mouse_deltas);
     REGISTER_FUNC(recomp_get_inverted_axes);
     REGISTER_FUNC(recomp_get_analog_inverted_axes);
     recompui::register_ui_exports();
@@ -634,15 +715,26 @@ int main(int argc, char** argv) {
 
     pilotwings64::register_overlays();
     pilotwings64::register_patches();
-    // recomputil::init_extended_actor_data();
-    pilotwings64::load_config();
+
+    // Register extensions for two types: Props and ActorMarkers.
+    // recomputil::init_extended_object_data(2);
+
+    recompinput::players::set_single_player_mode(true);
+
+    pilotwings64::init_config();
+
+    recompui::register_launcher_init_callback(on_launcher_init);
+    recompui::register_launcher_update_callback(pilotwings64::launcher_animation_update);
 
     recomp::rsp::callbacks_t rsp_callbacks{
         .get_rsp_microcode = get_rsp_microcode,
     };
 
     ultramodern::renderer::callbacks_t renderer_callbacks{
-        .create_render_context = pilotwings64::renderer::create_render_context,
+        .create_render_context = [](uint8_t* rdram, ultramodern::renderer::WindowHandle window_handle, bool developer_mode) {
+            auto presentation_mode = ultramodern::renderer::PresentationMode::PresentEarly;
+            return recompui::renderer::create_render_context(rdram, window_handle, presentation_mode, developer_mode);
+        },
     };
 
     ultramodern::gfx_callbacks_t gfx_callbacks{
@@ -658,15 +750,15 @@ int main(int argc, char** argv) {
     };
 
     ultramodern::input::callbacks_t input_callbacks{
-        .poll_input = recomp::poll_inputs,
-        .get_input = recomp::get_n64_input,
-        .set_rumble = recomp::set_rumble,
-        .get_connected_device_info = recomp::get_connected_device_info,
+        .poll_input = recompinput::poll_inputs,
+        .get_input = recompinput::profiles::get_n64_input,
+        .set_rumble = recompinput::set_rumble,
+        .get_connected_device_info = get_connected_device_info,
     };
 
     ultramodern::events::callbacks_t thread_callbacks{
-        .vi_callback = recomp::update_rumble,
-        .gfx_init_callback = recompui::update_supported_options,
+        .vi_callback = recompinput::update_rumble,
+        .gfx_init_callback = nullptr,
     };
 
     ultramodern::error_handling::callbacks_t error_handling_callbacks{

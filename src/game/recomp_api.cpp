@@ -2,10 +2,11 @@
 
 #include "recomp.h"
 #include "librecomp/overlays.hpp"
+#include "librecomp/addresses.hpp"
 #include "pilotwings64_config.h"
-#include "recomp_input.h"
-#include "recomp_ui.h"
-#include "pilotwings64_render.h"
+#include "recompinput/recompinput.h"
+#include "recompui/recompui.h"
+#include "recompui/renderer.h"
 #include "pilotwings64_sound.h"
 #include "librecomp/helpers.hpp"
 #include "../patches/input.h"
@@ -13,6 +14,7 @@
 #include "../patches/sound.h"
 #include "ultramodern/ultramodern.hpp"
 #include "ultramodern/config.hpp"
+#include "../lib/N64ModernRuntime/thirdparty/xxHash/xxh3.h"
 
 extern "C" void __osGetCause_recomp(uint8_t* rdram, recomp_context* ctx) { }
 extern "C" void osMapTLBRdb_recomp(uint8_t* rdram, recomp_context* ctx) { }
@@ -27,7 +29,7 @@ extern "C" void recomp_get_actor_spawn_index(uint8_t* rdram, recomp_context* ctx
 extern "C" void recomp_register_actor_extension(uint8_t* rdram, recomp_context* ctx) { }
 extern "C" void recomp_register_actor_extension_generic(uint8_t* rdram, recomp_context* ctx) { }
 extern "C" void recomp_update_inputs(uint8_t* rdram, recomp_context* ctx) {
-    recomp::poll_inputs();
+    recompinput::poll_inputs();
 }
 
 extern "C" void recomp_puti(uint8_t* rdram, recomp_context* ctx) {
@@ -48,18 +50,32 @@ extern "C" void recomp_exit(uint8_t* rdram, recomp_context* ctx) {
     ultramodern::quit();
 }
 
+extern "C" void recomp_error(uint8_t* rdram, recomp_context* ctx) {
+    std::string str{};
+    PTR(u8) str_ptr = _arg<0, PTR(u8)>(rdram, ctx);
+
+    for (size_t i = 0; MEM_B(str_ptr, i) != '\x00'; i++) {
+        str += (char)MEM_B(str_ptr, i);
+    }
+
+    recompui::message_box(str.c_str());
+    assert(false);
+    ultramodern::error_handling::quick_exit(__FILE__, __LINE__, __FUNCTION__);
+}
+
 extern "C" void recomp_get_gyro_deltas(uint8_t* rdram, recomp_context* ctx) {
     float* x_out = _arg<0, float*>(rdram, ctx);
     float* y_out = _arg<1, float*>(rdram, ctx);
 
-    recomp::get_gyro_deltas(x_out, y_out);
+    // TODO: use controller number
+    recompinput::get_gyro_deltas(0, x_out, y_out);
 }
 
 extern "C" void recomp_get_mouse_deltas(uint8_t* rdram, recomp_context* ctx) {
     float* x_out = _arg<0, float*>(rdram, ctx);
     float* y_out = _arg<1, float*>(rdram, ctx);
 
-    recomp::get_mouse_deltas(x_out, y_out);
+    recompinput::get_mouse_deltas(x_out, y_out);
 }
 
 extern "C" void recomp_powf(uint8_t* rdram, recomp_context* ctx) {
@@ -103,24 +119,12 @@ extern "C" void recomp_get_target_aspect_ratio(uint8_t* rdram, recomp_context* c
     }
 }
 
-extern "C" void recomp_get_targeting_mode(uint8_t* rdram, recomp_context* ctx) {
-    _return(ctx, static_cast<int>(pilotwings64::get_targeting_mode()));
-}
-
 extern "C" void recomp_get_bgm_volume(uint8_t* rdram, recomp_context* ctx) {
     _return(ctx, pilotwings64::get_bgm_volume() / 100.0f);
 }
 
-extern "C" void recomp_get_low_health_beeps_enabled(uint8_t* rdram, recomp_context* ctx) {
-    _return(ctx, static_cast<u32>(pilotwings64::get_low_health_beeps_enabled()));
-}
-
 extern "C" void recomp_time_us(uint8_t* rdram, recomp_context* ctx) {
     _return(ctx, static_cast<u32>(std::chrono::duration_cast<std::chrono::microseconds>(ultramodern::time_since_start()).count()));
-}
-
-extern "C" void recomp_get_autosave_enabled(uint8_t* rdram, recomp_context* ctx) {
-    _return(ctx, static_cast<s32>(pilotwings64::get_autosave_mode() == pilotwings64::AutosaveMode::On));
 }
 
 extern "C" void recomp_load_overlays(uint8_t * rdram, recomp_context * ctx) {
@@ -132,7 +136,7 @@ extern "C" void recomp_load_overlays(uint8_t * rdram, recomp_context * ctx) {
 }
 
 extern "C" void recomp_high_precision_fb_enabled(uint8_t * rdram, recomp_context * ctx) {
-    _return(ctx, static_cast<s32>(pilotwings64::renderer::RT64HighPrecisionFBEnabled()));
+    _return(ctx, static_cast<s32>(recompui::renderer::RT64HighPrecisionFBEnabled()));
 }
 
 extern "C" void recomp_get_resolution_scale(uint8_t* rdram, recomp_context* ctx) {
@@ -172,7 +176,7 @@ extern "C" void recomp_get_camera_inputs(uint8_t* rdram, recomp_context* ctx) {
 
     float x, y;
 
-    recomp::get_right_analog(&x, &y);
+    recompinput::get_right_analog(0, &x, &y);
 
     float magnitude = sqrtf(x * x + y * y);
 
@@ -192,5 +196,5 @@ extern "C" void recomp_get_camera_inputs(uint8_t* rdram, recomp_context* ctx) {
 extern "C" void recomp_set_right_analog_suppressed(uint8_t* rdram, recomp_context* ctx) {
     s32 suppressed = _arg<0, s32>(rdram, ctx);
 
-    recomp::set_right_analog_suppressed(suppressed);
+    recompinput::set_right_analog_suppressed(suppressed);
 }

@@ -2,78 +2,53 @@
 #define __PILOTWINGS64_CONFIG_H__
 
 #include <filesystem>
+#include <string>
 #include <string_view>
-#include "ultramodern/config.hpp"
-#include "recomp_input.h"
+
+#include "json/json.hpp"
 
 namespace pilotwings64 {
-    constexpr std::u8string_view program_id = u8"Pilotwings64Recompiled";
-    constexpr std::string_view program_name = "Pilotwings 64: Recompiled";
+    inline const std::u8string program_id = u8"Pilotwings64Recompiled";
+    inline const std::string program_name = "Pilotwings 64: Recompiled";
+
+    namespace configkeys {
+        namespace general {
+            inline const std::string note_saving_mode = "note_saving_mode";
+            inline const std::string camera_invert_mode = "camera_invert_mode";
+            inline const std::string analog_cam_mode = "analog_cam_mode";
+            inline const std::string third_person_camera_invert_mode = "third_person_camera_invert_mode";
+            inline const std::string flying_and_swimming_invert_mode = "flying_and_swimming_invert_mode";
+            inline const std::string first_person_invert_mode = "first_person_invert_mode";
+            inline const std::string analog_camera_sensitivity = "analog_camera_sensitivity";
+        }
+
+        namespace sound {
+            inline const std::string bgm_volume = "bgm_volume";
+        }
+
+        namespace graphics {
+            inline const std::string cutscene_aspect_ratio_mode = "cutscene_aspect_ratio_mode";
+        }
+    }
 
     // TODO: Move loading configs to the runtime once we have a way to allow per-project customization.
-    void load_config();
-    void save_config();
-    
-    void reset_input_bindings();
-    void reset_cont_input_bindings();
-    void reset_kb_input_bindings();
-    void reset_single_input_binding(recomp::InputDevice device, recomp::GameInput input);
-
-    std::filesystem::path get_app_folder_path();
-    
-    bool get_debug_mode_enabled();
-    void set_debug_mode_enabled(bool enabled);
-    
-    enum class AutosaveMode {
-        On,
-        Off,
-        OptionCount
-    };
-
-    NLOHMANN_JSON_SERIALIZE_ENUM(pilotwings64::AutosaveMode, {
-        {pilotwings64::AutosaveMode::On, "On"},
-        {pilotwings64::AutosaveMode::Off, "Off"}
-    });
-
-    enum class TargetingMode {
-        Switch,
-        Hold,
-        OptionCount
-    };
-
-    NLOHMANN_JSON_SERIALIZE_ENUM(pilotwings64::TargetingMode, {
-        {pilotwings64::TargetingMode::Switch, "Switch"},
-        {pilotwings64::TargetingMode::Hold, "Hold"}
-    });
-
-    TargetingMode get_targeting_mode();
-    void set_targeting_mode(TargetingMode mode);
+    void init_config();
 
     enum class CameraInvertMode {
         InvertNone,
         InvertX,
         InvertY,
-        InvertBoth,
-        OptionCount
+        InvertBoth
     };
 
-    NLOHMANN_JSON_SERIALIZE_ENUM(pilotwings64::CameraInvertMode, {
-        {pilotwings64::CameraInvertMode::InvertNone, "InvertNone"},
-        {pilotwings64::CameraInvertMode::InvertX, "InvertX"},
-        {pilotwings64::CameraInvertMode::InvertY, "InvertY"},
-        {pilotwings64::CameraInvertMode::InvertBoth, "InvertBoth"}
-    });
-
     CameraInvertMode get_camera_invert_mode();
-    void set_camera_invert_mode(CameraInvertMode mode);
 
     CameraInvertMode get_analog_camera_invert_mode();
-    void set_analog_camera_invert_mode(CameraInvertMode mode);
 
     enum class AnalogCamMode {
         On,
         Off,
-		OptionCount
+        OptionCount
     };
 
     NLOHMANN_JSON_SERIALIZE_ENUM(pilotwings64::AnalogCamMode, {
@@ -81,11 +56,31 @@ namespace pilotwings64 {
         {pilotwings64::AnalogCamMode::Off, "Off"}
     });
 
-    AutosaveMode get_autosave_mode();
-    void set_autosave_mode(AutosaveMode mode);
-
     AnalogCamMode get_analog_cam_mode();
-    void set_analog_cam_mode(AnalogCamMode mode);
+
+    uint32_t get_analog_cam_sensitivity();
+
+    enum class NoteSavingMode {
+        On,
+        Off,
+        OptionCount
+    };
+
+    NLOHMANN_JSON_SERIALIZE_ENUM(pilotwings64::NoteSavingMode, {
+        {pilotwings64::NoteSavingMode::On, "On"},
+        {pilotwings64::NoteSavingMode::Off, "Off"}
+    });
+
+    NoteSavingMode get_note_saving_mode();
+
+    enum class CutsceneAspectRatioMode {
+        Original,
+        Clamp16x9,
+        Full,
+        OptionCount
+    };
+
+    CutsceneAspectRatioMode get_cutscene_aspect_ratio_mode();
 
     void open_quit_game_prompt();
 };

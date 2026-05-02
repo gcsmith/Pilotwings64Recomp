@@ -5,7 +5,7 @@
 
 #include "slot_map.h"
 #include "recomp_data.h"
-#include "recomp_ui.h"
+#include "recompui/recompui.h"
 #include "librecomp/helpers.hpp"
 #include "librecomp/overlays.hpp"
 #include "librecomp/addresses.hpp"
@@ -638,7 +638,7 @@ void recomputil_memory_slotmap_create(uint8_t* rdram, recomp_context* ctx) {
     // Store the allocated pointer.
     PTR(void)* value_ptr;
     map->first.get(key, &value_ptr);
-    *value_ptr = static_cast<PTR(void)>(addr);
+    MEM_W(0, *value_ptr) = addr;
 
     // Return the key.
     _return(ctx, key);
