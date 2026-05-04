@@ -21,13 +21,7 @@ extern "C" void osMapTLBRdb_recomp(uint8_t* rdram, recomp_context* ctx) { }
 extern "C" void osPiRawReadIo_recomp(uint8_t* rdram, recomp_context* ctx) { }
 extern "C" void osPiReadIo_recomp(uint8_t* rdram, recomp_context* ctx) { }
 extern "C" void osPiWriteIo_recomp(uint8_t* rdram, recomp_context* ctx) { }
-extern "C" void recomp_clear_all_actor_data(uint8_t* rdram, recomp_context* ctx) { }
-extern "C" void recomp_create_actor_data(uint8_t* rdram, recomp_context* ctx) { }
-extern "C" void recomp_destroy_actor_data(uint8_t* rdram, recomp_context* ctx) { }
-extern "C" void recomp_get_actor_data(uint8_t* rdram, recomp_context* ctx) { }
-extern "C" void recomp_get_actor_spawn_index(uint8_t* rdram, recomp_context* ctx) { }
-extern "C" void recomp_register_actor_extension(uint8_t* rdram, recomp_context* ctx) { }
-extern "C" void recomp_register_actor_extension_generic(uint8_t* rdram, recomp_context* ctx) { }
+
 extern "C" void recomp_update_inputs(uint8_t* rdram, recomp_context* ctx) {
     recompinput::poll_inputs();
 }
@@ -176,6 +170,7 @@ extern "C" void recomp_get_camera_inputs(uint8_t* rdram, recomp_context* ctx) {
 
     float x, y;
 
+    // TODO: Use controller number.
     recompinput::get_right_analog(0, &x, &y);
 
     float magnitude = sqrtf(x * x + y * y);
