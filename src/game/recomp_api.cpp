@@ -4,10 +4,11 @@
 #include "librecomp/overlays.hpp"
 #include "librecomp/addresses.hpp"
 #include "pilotwings64_config.h"
+#include "pilotwings64_debug.h"
+#include "pilotwings64_sound.h"
 #include "recompinput/recompinput.h"
 #include "recompui/recompui.h"
 #include "recompui/renderer.h"
-#include "pilotwings64_sound.h"
 #include "librecomp/helpers.hpp"
 #include "../patches/input.h"
 #include "../patches/graphics.h"
@@ -35,9 +36,11 @@ extern "C" void recomp_puts(uint8_t* rdram, recomp_context* ctx) {
     PTR(char) cur_str = _arg<0, PTR(char)>(rdram, ctx);
     u32 length = _arg<1, u32>(rdram, ctx);
 
-    for (u32 i = 0; i < length; i++) {
-        fputc(MEM_B(i, (gpr)cur_str), stdout);
+    std::string msg(length, ' ');
+    for (u32 i = 0; i < length - 1; i++) {
+        msg[i] = MEM_B(i, (gpr)cur_str);
     }
+    pilotwings64_trace_debug(rdram, msg.c_str());
 }
 
 extern "C" void recomp_exit(uint8_t* rdram, recomp_context* ctx) {
@@ -193,3 +196,24 @@ extern "C" void recomp_set_right_analog_suppressed(uint8_t* rdram, recomp_contex
 
     recompinput::set_right_analog_suppressed(suppressed);
 }
+
+extern "C" void recomp_get_trace_debug_printf(uint8_t* rdram, recomp_context* ctx) {
+    _return(ctx, pilotwings64::get_trace_debug_printf() ? 1 : 0);
+}
+
+extern "C" void recomp_get_trace_emitter_printf(uint8_t* rdram, recomp_context* ctx) {
+    _return(ctx, pilotwings64::get_trace_emitter_printf() ? 1 : 0);
+}
+
+extern "C" void recomp_get_override_max_lod(uint8_t* rdram, recomp_context* ctx) {
+    _return(ctx, pilotwings64::get_override_max_lod() ? 1 : 0);
+}
+
+extern "C" void recomp_get_override_proxanim_range(uint8_t* rdram, recomp_context* ctx) {
+    _return(ctx, pilotwings64::get_override_proxanim_range() ? 1 : 0);
+}
+
+extern "C" void recomp_get_remove_screen_border(uint8_t* rdram, recomp_context* ctx) {
+    _return(ctx, pilotwings64::get_remove_screen_border() ? 1 : 0);
+}
+

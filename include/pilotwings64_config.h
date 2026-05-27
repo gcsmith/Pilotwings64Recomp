@@ -5,15 +5,12 @@
 #include <string>
 #include <string_view>
 
-#include "json/json.hpp"
-
 namespace pilotwings64 {
     inline const std::u8string program_id = u8"Pilotwings64Recompiled";
     inline const std::string program_name = "Pilotwings 64: Recompiled";
 
     namespace configkeys {
         namespace general {
-            inline const std::string note_saving_mode = "note_saving_mode";
             inline const std::string camera_invert_mode = "camera_invert_mode";
             inline const std::string analog_cam_mode = "analog_cam_mode";
             inline const std::string third_person_camera_invert_mode = "third_person_camera_invert_mode";
@@ -28,6 +25,15 @@ namespace pilotwings64 {
 
         namespace graphics {
             inline const std::string cutscene_aspect_ratio_mode = "cutscene_aspect_ratio_mode";
+        }
+
+        namespace debug {
+            inline const std::string trace_debug_printf = "trace_debug_printf";
+            inline const std::string trace_emitter_printf = "trace_emitter_printf";
+            inline const std::string trace_recomp_funcs = "trace_recomp_funcs";
+            inline const std::string override_max_lod = "override_max_lod";
+            inline const std::string override_proxanim_range = "override_proxanim_range";
+            inline const std::string remove_screen_border = "remove_screen_border";
         }
     }
 
@@ -51,27 +57,9 @@ namespace pilotwings64 {
         OptionCount
     };
 
-    NLOHMANN_JSON_SERIALIZE_ENUM(pilotwings64::AnalogCamMode, {
-        {pilotwings64::AnalogCamMode::On, "On"},
-        {pilotwings64::AnalogCamMode::Off, "Off"}
-    });
-
     AnalogCamMode get_analog_cam_mode();
 
     uint32_t get_analog_cam_sensitivity();
-
-    enum class NoteSavingMode {
-        On,
-        Off,
-        OptionCount
-    };
-
-    NLOHMANN_JSON_SERIALIZE_ENUM(pilotwings64::NoteSavingMode, {
-        {pilotwings64::NoteSavingMode::On, "On"},
-        {pilotwings64::NoteSavingMode::Off, "Off"}
-    });
-
-    NoteSavingMode get_note_saving_mode();
 
     enum class CutsceneAspectRatioMode {
         Original,

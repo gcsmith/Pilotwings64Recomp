@@ -1,4 +1,3 @@
-#include <cstdio>
 #include <cassert>
 #include <unordered_map>
 #include <vector>
@@ -8,6 +7,7 @@
 #include <stdexcept>
 #include <cinttypes>
 #include <format>
+#include "spdlog/spdlog.h"
 
 #include "nfd.h"
 
@@ -38,6 +38,7 @@
 #include "recompinput/recompinput.h"
 #include "recompinput/profiles.h"
 #include "pilotwings64_config.h"
+#include "pilotwings64_debug.h"
 #include "pilotwings64_sound.h"
 #include "pilotwings64_game.h"
 #include "pilotwings64_launcher.h"
@@ -87,8 +88,7 @@ ultramodern::gfx_callbacks_t::gfx_data_t create_gfx() {
         exit_error("Failed to initialize SDL2: %s\n", SDL_GetError());
     }
 
-    fprintf(stdout, "SDL Video Driver: %s\n", SDL_GetCurrentVideoDriver());
-
+    spdlog::info("SDL Video Driver: {}", SDL_GetCurrentVideoDriver());
     return {};
 }
 
@@ -255,7 +255,7 @@ void queue_samples(int16_t* audio_data, size_t sample_count) {
     int ret = SDL_ConvertAudio(&audio_convert);
 
     if (ret < 0) {
-        printf("Error using SDL audio converter: %s\n", SDL_GetError());
+        spdlog::error("Error using SDL audio converter: {}", SDL_GetError());
         throw std::runtime_error("Error using SDL audio converter");
     }
 
@@ -307,7 +307,7 @@ void update_audio_converter() {
     int ret = SDL_BuildAudioCVT(&audio_convert, AUDIO_F32, input_channels, sample_rate, AUDIO_F32, output_channels, output_sample_rate);
 
     if (ret < 0) {
-        printf("Error creating SDL audio converter: %s\n", SDL_GetError());
+        spdlog::error("Error creating SDL audio converter: {}", SDL_GetError());
         throw std::runtime_error("Error creating SDL audio converter");
     }
 
@@ -357,7 +357,7 @@ RspUcodeFunc* get_rsp_microcode(const OSTask* task) {
         return aspMain;
 
     default:
-        fprintf(stderr, "Unknown task: %" PRIu32 "\n", task->t.type);
+        spdlog::error("Unknown task: {}", task->t.type);
         return nullptr;
     }
 }
@@ -441,14 +441,14 @@ bool preload_executable(PreloadContext& context) {
 
     context.handle = CreateFileW(module_name, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
     if (context.handle == INVALID_HANDLE_VALUE) {
-        fprintf(stderr, "Failed to load executable into memory!");
+        spdlog::error("Failed to load executable into memory!");
         context = {};
         return false;
     }
 
     LARGE_INTEGER module_size;
     if (!GetFileSizeEx(context.handle, &module_size)) {
-        fprintf(stderr, "Failed to get size of executable!");
+        spdlog::error("Failed to get size of executable!");
         CloseHandle(context.handle);
         context = {};
         return false;
@@ -458,7 +458,7 @@ bool preload_executable(PreloadContext& context) {
 
     context.mapping_handle = CreateFileMappingW(context.handle, nullptr, PAGE_READONLY, 0, 0, nullptr);
     if (context.mapping_handle == nullptr) {
-        fprintf(stderr, "Failed to create file mapping of executable!");
+        spdlog::error("Failed to create file mapping of executable!");
         CloseHandle(context.handle);
         context = {};
         return EXIT_FAILURE;
@@ -466,7 +466,7 @@ bool preload_executable(PreloadContext& context) {
 
     context.view = MapViewOfFile(context.mapping_handle, FILE_MAP_READ, 0, 0, 0);
     if (context.view == nullptr) {
-        fprintf(stderr, "Failed to map view of of executable!");
+        spdlog::error("Failed to map view of of executable!");
         CloseHandle(context.mapping_handle);
         CloseHandle(context.handle);
         context = {};
@@ -476,7 +476,7 @@ bool preload_executable(PreloadContext& context) {
     DWORD pid = GetCurrentProcessId();
     HANDLE process_handle = OpenProcess(PROCESS_SET_QUOTA | PROCESS_QUERY_INFORMATION, FALSE, pid);
     if (process_handle == nullptr) {
-        fprintf(stderr, "Failed to open own process!");
+        spdlog::error("Failed to open own process!");
         CloseHandle(context.mapping_handle);
         CloseHandle(context.handle);
         context = {};
@@ -485,7 +485,7 @@ bool preload_executable(PreloadContext& context) {
 
     SIZE_T minimum_set_size, maximum_set_size;
     if (!GetProcessWorkingSetSize(process_handle, &minimum_set_size, &maximum_set_size)) {
-        fprintf(stderr, "Failed to get working set size!");
+        spdlog::error("Failed to get working set size!");
         CloseHandle(context.mapping_handle);
         CloseHandle(context.handle);
         context = {};
@@ -493,7 +493,7 @@ bool preload_executable(PreloadContext& context) {
     }
 
     if (!SetProcessWorkingSetSize(process_handle, minimum_set_size + context.size, maximum_set_size + context.size)) {
-        fprintf(stderr, "Failed to set working set size!");
+        spdlog::error("Failed to set working set size!");
         CloseHandle(context.mapping_handle);
         CloseHandle(context.handle);
         context = {};
@@ -501,7 +501,7 @@ bool preload_executable(PreloadContext& context) {
     }
 
     if (VirtualLock(context.view, context.size) == 0) {
-        fprintf(stderr, "Failed to lock view of executable! (Error: %08lx)\n", GetLastError());
+        spdlog::error("Failed to lock view of executable! (Error: {:08x})\n", GetLastError());
         CloseHandle(context.mapping_handle);
         CloseHandle(context.handle);
         context = {};
@@ -603,6 +603,9 @@ void on_launcher_init(recompui::LauncherMenu *menu) {
 int main(int argc, char** argv) {
     (void)argc;
     (void)argv;
+
+    pilotwings64_trace_init();
+
     recomp::Version project_version{};
     if (!recomp::Version::from_string(version_string, project_version)) {
         ultramodern::error_handling::message_box(("Invalid version string: " + version_string).c_str());
@@ -615,7 +618,7 @@ int main(int argc, char** argv) {
     bool preloaded = preload_executable(preload_context);
 
     if (!preloaded) {
-        fprintf(stderr, "Failed to preload executable!\n");
+        spdlog::error("Failed to preload executable!");
     }
 
     // Initialize random seed for icon easter egg.
@@ -687,7 +690,7 @@ int main(int argc, char** argv) {
     // Source controller mappings file
     std::u8string controller_db_path = (recompui::file::get_program_path() / "recompcontrollerdb.txt").u8string();
     if (SDL_GameControllerAddMappingsFromFile(reinterpret_cast<const char *>(controller_db_path.c_str())) < 0) {
-        fprintf(stderr, "Failed to load controller mappings: %s\n", SDL_GetError());
+        spdlog::error("Failed to load controller mappings: {}", SDL_GetError());
     }
 
     // Register fonts.

@@ -1,8 +1,9 @@
 #include "pilotwings64_config.h"
+#include "pilotwings64_debug.h"
+#include "pilotwings64_sound.h"
 #include "recompui/recompui.h"
 #include "recompui/config.h"
 #include "recompinput/recompinput.h"
-#include "pilotwings64_sound.h"
 #include "ultramodern/config.hpp"
 #include "librecomp/files.hpp"
 #include "librecomp/config.hpp"
@@ -23,17 +24,6 @@
 static void add_general_options(recomp::config::Config &config) {
     using EnumOptionVector = const std::vector<recomp::config::ConfigOptionEnumOption>;
 
-    static EnumOptionVector note_saving_mode_options = {
-        {pilotwings64::NoteSavingMode::Off, "Off", "Off"},
-        {pilotwings64::NoteSavingMode::On, "On", "On"},
-    };
-    config.add_enum_option(
-        pilotwings64::configkeys::general::note_saving_mode,
-        "Note Saving",
-        "Saves collected notes so that you don't need to collect them again when revisiting a level. <recomp-color primary>On</recomp-color> is the default, while <recomp-color primary>off</recomp-color> matches the original game.",
-        note_saving_mode_options,
-        pilotwings64::NoteSavingMode::On
-    );
     static EnumOptionVector analog_cam_mode_options = {
         {pilotwings64::AnalogCamMode::Off, "Off", "Off"},
         {pilotwings64::AnalogCamMode::On, "On", "On"},
@@ -107,10 +97,6 @@ T get_general_config_number_value(const std::string& option_id) {
     return static_cast<T>(std::get<double>(recompui::config::get_general_config().get_option_value(option_id)));
 }
 
-pilotwings64::NoteSavingMode pilotwings64::get_note_saving_mode() {
-    return get_general_config_enum_value<pilotwings64::NoteSavingMode>(pilotwings64::configkeys::general::note_saving_mode);
-}
-
 pilotwings64::CameraInvertMode pilotwings64::get_camera_invert_mode() {
     return get_general_config_enum_value<pilotwings64::CameraInvertMode>(pilotwings64::configkeys::general::camera_invert_mode);
 }
@@ -140,6 +126,7 @@ static void add_sound_options(recomp::config::Config &config) {
         100.0f
     );
 }
+
 template <typename T = uint32_t>
 T get_sound_config_number_value(const std::string& option_id) {
     return static_cast<T>(std::get<double>(recompui::config::get_sound_config().get_option_value(option_id)));
@@ -163,6 +150,78 @@ static void add_graphics_options(recomp::config::Config &config) {
         cutscene_aspect_ratio_mode_options,
         pilotwings64::CutsceneAspectRatioMode::Clamp16x9
     );    
+}
+
+static void add_debug_options(recomp::config::Config &config) {
+    config.add_bool_option(
+        pilotwings64::configkeys::debug::trace_debug_printf,
+        "Trace uvDebugPrintf",
+        "Enables tracing of internal calls to uvDebugPrintf.",
+        false
+    );
+    config.add_bool_option(
+        pilotwings64::configkeys::debug::trace_emitter_printf,
+        "Trace uvEmitterPrintf",
+        "Enables tracing of internal calls to uvEmitterPrintf.",
+        false
+    );
+    config.add_bool_option(
+        pilotwings64::configkeys::debug::trace_recomp_funcs,
+        "Trace RecompFuncs",
+        "Enables tracing of internal recompiled function calls (trace_mode must be enabled).",
+        false
+    );
+    config.add_bool_option(
+        pilotwings64::configkeys::debug::override_max_lod,
+        "Override Maximum LOD",
+        "Overrides level-of-detal (LOD) selection to maximum detail.",
+        true
+    );
+    config.add_bool_option(
+        pilotwings64::configkeys::debug::override_proxanim_range,
+        "Override ProxAnim Range",
+        "Overrides proximity-based animation range to maximum detail.",
+        true
+    );
+    config.add_bool_option(
+        pilotwings64::configkeys::debug::remove_screen_border,
+        "Remove Screen Border",
+        "Remove black screen border present in the original game.",
+        true
+    );
+}
+
+template <typename T = uint32_t>
+T get_debug_config_number_value(const std::string& option_id) {
+    return static_cast<T>(std::get<double>(recompui::config::get_config("debug").get_option_value(option_id)));
+}
+
+inline bool get_debug_config_bool_value(const std::string& option_id) {
+    return std::get<bool>(recompui::config::get_config("debug").get_option_value(option_id));
+}
+
+bool pilotwings64::get_trace_debug_printf() {
+    return get_debug_config_bool_value(pilotwings64::configkeys::debug::trace_debug_printf);
+}
+
+bool pilotwings64::get_trace_emitter_printf() {
+    return get_debug_config_bool_value(pilotwings64::configkeys::debug::trace_emitter_printf);
+}
+
+bool pilotwings64::get_trace_recomp_funcs() {
+    return get_debug_config_bool_value(pilotwings64::configkeys::debug::trace_recomp_funcs);
+}
+
+bool pilotwings64::get_override_max_lod() {
+    return get_debug_config_bool_value(pilotwings64::configkeys::debug::override_max_lod);
+}
+
+bool pilotwings64::get_override_proxanim_range() {
+    return get_debug_config_bool_value(pilotwings64::configkeys::debug::override_proxanim_range);
+}
+
+bool pilotwings64::get_remove_screen_border() {
+    return get_debug_config_bool_value(pilotwings64::configkeys::debug::remove_screen_border);
 }
 
 static void set_control_defaults() {
@@ -259,6 +318,9 @@ void pilotwings64::init_config() {
     add_sound_options(sound_config);
 
     recompui::config::create_mods_tab();
+
+    auto &debug_config = recompui::config::create_config_tab("Debug", "debug", false);
+    add_debug_options(debug_config);
 
     recompui::config::finalize();
 

@@ -1,3 +1,4 @@
+#include "debug.h"
 #include "patches.h"
 #include "uv_string.h"
 
@@ -112,11 +113,10 @@ s32 uvSprintf_n(char* dest, const char* fmt, va_list ap) {
 }
 
 RECOMP_PATCH void _uvDebugPrintf(char* fmt, ...) {
-    static int sEnableDebugPrints = FALSE; // TODO hook into configuration
     static char sBuffer[1024];
     va_list args;
 
-    if (sEnableDebugPrints) {
+    if (recomp_get_trace_debug_printf()) {
         va_start(args, fmt);
         s32 length = uvSprintf_n(sBuffer, fmt, args);
         recomp_puts(sBuffer, length);
@@ -125,11 +125,10 @@ RECOMP_PATCH void _uvDebugPrintf(char* fmt, ...) {
 }
 
 RECOMP_PATCH void uvEmitterPrintf(const char* fmt, ...) {
-    static int sEnableEmitterPrints = FALSE; // TODO hook into configuration
     static char sBuffer[1024];
     va_list args;
 
-    if (sEnableEmitterPrints) {
+    if (recomp_get_trace_emitter_printf()) {
         va_start(args, fmt);
         s32 length = uvSprintf_n(sBuffer, fmt, args);
         recomp_puts(sBuffer, length);
