@@ -13,3 +13,6 @@
 [submodule "lib/Pilotwings64RecompSyms"]
 	path = lib/Pilotwings64RecompSyms
 	url = https://github.com/gcsmith/Pilotwings64RecompSyms.git
+[submodule "lib/spdlog"]
+	path = lib/spdlog
+	url = https://github.com/gabime/spdlog.git

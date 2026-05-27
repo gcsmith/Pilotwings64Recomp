@@ -323,6 +323,7 @@ set(RECOMP_FRONTEND_N64MODERNRUNTIME_PATH ${CMAKE_SOURCE_DIR}/lib/N64ModernRunti
 set(RECOMP_FRONTEND_RT64_PATH ${CMAKE_SOURCE_DIR}/lib/rt64)
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/lib/RecompFrontend)
+add_subdirectory(${CMAKE_SOURCE_DIR}/lib/spdlog)
 
 target_link_libraries(Pilotwings64Recompiled PRIVATE
     PatchesLib
@@ -333,6 +334,7 @@ target_link_libraries(Pilotwings64Recompiled PRIVATE
     ultramodern
     rt64
     nfd
+    spdlog
 )
 
 # Embed all .nrm files in the "mods" directory
