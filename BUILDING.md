@@ -30,7 +30,7 @@ In the setup process you'll need to select the following options and tools for i
 - C++ Clang Compiler for Windows
 - C++ CMake tools for Windows
 
-The other tool necessary will be `make` which can be installe via [Chocolatey](https://chocolatey.org/):
+The other tool necessary will be `make` which can be installed via [Chocolatey](https://chocolatey.org/):
 ```bash
 choco install make
 ```
